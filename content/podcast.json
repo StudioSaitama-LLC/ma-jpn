@@ -1,0 +1,62 @@
+[
+  {
+    "id": "ep-045",
+    "title": "Ma: The Philosophy of The Space Between",
+    "description": "An exploration of the Japanese concept of Ma and how negative space shapes our perception of beauty, architecture, and daily life.",
+    "season": 4,
+    "episode": 45,
+    "duration": "54 Minutes",
+    "podcastUrl": "https://podcasts.example.com/ep045",
+    "tags": ["philosophy", "ma", "space", "japanese-aesthetics"],
+    "publishedAt": "2025-03-10",
+    "featured": true
+  },
+  {
+    "id": "ep-044",
+    "title": "Digital Minimalism & Focus",
+    "description": "A conversation on reclaiming attention in the age of constant connectivity.",
+    "season": 4,
+    "episode": 44,
+    "duration": "42 Minutes",
+    "podcastUrl": "https://podcasts.example.com/ep044",
+    "tags": ["minimalism", "digital", "focus", "attention"],
+    "publishedAt": "2025-02-24",
+    "featured": false
+  },
+  {
+    "id": "ep-043",
+    "title": "The Ritual of Tea",
+    "description": "How a simple daily habit can become a profound anchor for the soul.",
+    "season": 4,
+    "episode": 43,
+    "duration": "38 Minutes",
+    "podcastUrl": "https://podcasts.example.com/ep043",
+    "tags": ["tea", "ritual", "mindfulness", "ceremony"],
+    "publishedAt": "2025-02-10",
+    "featured": false
+  },
+  {
+    "id": "ep-042",
+    "title": "Silence as a Creative Tool",
+    "description": "Musicians, writers, and architects discuss how silence informs their creative process.",
+    "season": 4,
+    "episode": 42,
+    "duration": "61 Minutes",
+    "podcastUrl": "https://podcasts.example.com/ep042",
+    "tags": ["silence", "creativity", "music", "architecture"],
+    "publishedAt": "2025-01-27",
+    "featured": false
+  },
+  {
+    "id": "ep-041",
+    "title": "The Weight of Objects",
+    "description": "On the emotional gravity of the things we keep and the freedom of letting go.",
+    "season": 4,
+    "episode": 41,
+    "duration": "47 Minutes",
+    "podcastUrl": "https://podcasts.example.com/ep041",
+    "tags": ["objects", "minimalism", "letting-go"],
+    "publishedAt": "2025-01-13",
+    "featured": false
+  }
+]

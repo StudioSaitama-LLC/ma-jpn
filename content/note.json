@@ -1,0 +1,62 @@
+[
+  {
+    "id": "note-204",
+    "title": "Observations on light hitting a concrete wall at 4PM.",
+    "excerpt": "There is a specific quality to the light in late autumn. It doesn't just illuminate; it carves. The shadows are long, indigo-tinted, stretching across the floor like memories of the day just passed.",
+    "noteUrl": "https://note.com/example/n/note204",
+    "thumbnailUrl": "",
+    "category": "Essay",
+    "tags": ["light", "observation", "architecture", "autumn"],
+    "publishedAt": "2025-03-18",
+    "readTime": "06 Min",
+    "featured": true
+  },
+  {
+    "id": "note-203",
+    "title": "The Architecture of Stillness",
+    "excerpt": "A study on how physical spaces dictate internal volume. If the room is cluttered, can the mind truly expand?",
+    "noteUrl": "https://note.com/example/n/note203",
+    "thumbnailUrl": "",
+    "category": "Thoughts",
+    "tags": ["architecture", "stillness", "space", "mind"],
+    "publishedAt": "2024-10-23",
+    "readTime": "04 Min",
+    "featured": false
+  },
+  {
+    "id": "note-202",
+    "title": "Winter Solitude",
+    "excerpt": "A photographic meditation on the quiet beauty of empty winter landscapes and the solitude they invite.",
+    "noteUrl": "https://note.com/example/n/note202",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800&q=80",
+    "category": "Photo Essay",
+    "tags": ["winter", "photography", "solitude", "landscape"],
+    "publishedAt": "2024-12-15",
+    "readTime": "08 Min",
+    "featured": false
+  },
+  {
+    "id": "note-201",
+    "title": "On the Impermanence of Sound",
+    "excerpt": "Sound exists only in the moment of its creation. Unlike light, it cannot be captured — only approximated.",
+    "noteUrl": "https://note.com/example/n/note201",
+    "thumbnailUrl": "",
+    "category": "Essay",
+    "tags": ["sound", "impermanence", "philosophy"],
+    "publishedAt": "2024-11-30",
+    "readTime": "05 Min",
+    "featured": false
+  },
+  {
+    "id": "note-200",
+    "title": "A Room Without Furniture",
+    "excerpt": "What does an empty room communicate? The absence of objects speaks louder than their presence.",
+    "noteUrl": "https://note.com/example/n/note200",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80",
+    "category": "Thoughts",
+    "tags": ["space", "emptiness", "minimalism", "architecture"],
+    "publishedAt": "2024-11-10",
+    "readTime": "03 Min",
+    "featured": false
+  }
+]

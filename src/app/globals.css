@@ -1,26 +1,200 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* === MA Design System: Wabi-Sabi Modernity === */
+
+  /* Surface / Background */
+  --color-surface: #fbf9f4;
+  --color-surface-bright: #fbf9f4;
+  --color-surface-dim: #d9dbcf;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f5f4ed;
+  --color-surface-container: #efeee6;
+  --color-surface-container-high: #e8e9e0;
+  --color-surface-container-highest: #e2e3d9;
+  --color-surface-variant: #e2e3d9;
+
+  /* Primary */
+  --color-primary: #5f5e5e;
+  --color-primary-dim: #535252;
+  --color-primary-container: #e4e2e1;
+  --color-primary-fixed: #e4e2e1;
+  --color-primary-fixed-dim: #d6d4d3;
+  --color-on-primary: #faf7f6;
+  --color-on-primary-container: #525251;
+  --color-on-primary-fixed: #3f3f3f;
+  --color-on-primary-fixed-variant: #5c5b5b;
+
+  /* Secondary */
+  --color-secondary: #645e58;
+  --color-secondary-dim: #57524c;
+  --color-secondary-container: #eae1d8;
+  --color-secondary-fixed: #eae1d8;
+  --color-secondary-fixed-dim: #dbd3cb;
+  --color-on-secondary: #fff8f2;
+  --color-on-secondary-container: #56514b;
+  --color-on-secondary-fixed: #433f39;
+
+  /* Tertiary */
+  --color-tertiary: #6b5d4f;
+  --color-tertiary-dim: #5e5144;
+  --color-tertiary-container: #fce8d6;
+  --color-tertiary-fixed: #fce8d6;
+  --color-tertiary-fixed-dim: #edd9c9;
+  --color-on-tertiary: #fff7f3;
+  --color-on-tertiary-container: #625447;
+
+  /* On Surface */
+  --color-on-surface: #31332c;
+  --color-on-surface-variant: #5e6058;
+  --color-on-background: #31332c;
+  --color-background: #fbf9f4;
+
+  /* Outline */
+  --color-outline: #797c73;
+  --color-outline-variant: #b1b3a9;
+
+  /* Error */
+  --color-error: #9f403d;
+  --color-error-container: #fe8983;
+  --color-on-error: #fff7f6;
+
+  /* Inverse */
+  --color-inverse-surface: #0e0e0c;
+  --color-inverse-on-surface: #9e9d99;
+  --color-inverse-primary: #ffffff;
+
+  /* Surface Tint */
+  --color-surface-tint: #5f5e5e;
+
+  /* Typography */
+  --font-headline: "Noto Serif", serif;
+  --font-body: "Plus Jakarta Sans", sans-serif;
+  --font-label: "Plus Jakarta Sans", sans-serif;
+
+  /* Border Radius - All 0px for architectural feel */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Material Symbols */
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 200, "GRAD" 0, "opsz" 24;
+}
+
+/* Grain Texture Overlay */
+.grain-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+}
+
+/* MA Watermark */
+.ma-watermark {
+  font-family: "Noto Serif", serif;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Sketch texture animations */
+@keyframes sketch-drift {
+  0% {
+    transform: translate(0, 0) scale(1.05) rotate(0deg);
+  }
+  25% {
+    transform: translate(15px, -10px) scale(1.08) rotate(0.5deg);
+  }
+  50% {
+    transform: translate(-10px, 8px) scale(1.12) rotate(-0.3deg);
+  }
+  75% {
+    transform: translate(8px, 12px) scale(1.06) rotate(0.4deg);
+  }
+  100% {
+    transform: translate(0, 0) scale(1.05) rotate(0deg);
   }
 }
 
+@keyframes sketch-drift-reverse {
+  0% {
+    transform: translate(0, 0) scale(1.1) rotate(0deg);
+  }
+  25% {
+    transform: translate(-12px, 8px) scale(1.06) rotate(-0.5deg);
+  }
+  50% {
+    transform: translate(10px, -12px) scale(1.15) rotate(0.3deg);
+  }
+  75% {
+    transform: translate(-8px, -6px) scale(1.08) rotate(-0.2deg);
+  }
+  100% {
+    transform: translate(0, 0) scale(1.1) rotate(0deg);
+  }
+}
+
+@keyframes sketch-breathe {
+  0%, 100% {
+    opacity: 0.12;
+    transform: scale(1.05);
+  }
+  50% {
+    opacity: 0.18;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes sumi-shift {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-20px, 10px) scale(1.02);
+  }
+  66% {
+    transform: translate(15px, -8px) scale(0.98);
+  }
+}
+
+.sketch-animate-1 {
+  animation: sketch-drift 30s ease-in-out infinite;
+}
+
+.sketch-animate-2 {
+  animation: sketch-drift-reverse 25s ease-in-out infinite;
+}
+
+.sketch-animate-3 {
+  animation: sketch-breathe 20s ease-in-out infinite;
+}
+
+.sketch-animate-4 {
+  animation: sketch-drift 35s ease-in-out infinite;
+}
+
+.sumi-animate {
+  animation: sumi-shift 40s ease-in-out infinite;
+}
+
+/* Selection */
+::selection {
+  background-color: #e4e2e1;
+  color: #525251;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #fbf9f4;
+  color: #31332c;
+  font-family: "Plus Jakarta Sans", sans-serif;
 }
