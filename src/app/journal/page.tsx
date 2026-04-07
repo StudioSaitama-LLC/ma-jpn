@@ -29,8 +29,7 @@ export default function JournalPage() {
           </h1>
         </div>
         <p className="font-body font-extralight text-base max-w-md text-on-surface-variant leading-relaxed tracking-wide">
-          Fragments, essays, and observations on the quiet architecture of daily
-          life.
+          日々の中にある、静かな断片と思索。
         </p>
         <div className="mt-8 w-32 h-[1px] bg-outline-variant/30" />
       </div>

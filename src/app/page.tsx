@@ -7,6 +7,7 @@ import {
   getNoteItems,
   getFeaturedNote,
 } from "@/lib/content";
+import { YouTubeSection } from "@/components/YouTubeSection";
 
 export default function ArchivePage() {
   const youtubeItems = getYouTubeItems();
@@ -36,116 +37,22 @@ export default function ArchivePage() {
         {/* Header Section */}
         <div className="mb-24 flex flex-col items-start">
           <h1 className="font-headline text-6xl md:text-8xl tracking-widest leading-tight mb-4 text-on-background opacity-90">
-            Archive
+            間｜MA
           </h1>
           <p className="font-body font-extralight text-lg max-w-md text-on-surface-variant leading-relaxed tracking-wide">
-            A curated collection of silence, sound, and the space in between.
-            Atmospheric fragments of a quiet life.
+            立ち止まること。余白を残すこと。
+            すぐに、意味を求めないこと。
           </p>
           <div className="mt-8 w-32 h-[1px] bg-outline-variant/30" />
         </div>
 
-        {/* Sketch Texture - Header accent */}
-        <div className="absolute top-0 right-0 w-2/3 h-[600px] opacity-[0.15] pointer-events-none overflow-hidden">
-          <img
-            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/images/textures/sketch-01.jpg`}
-            alt=""
-            className="w-full h-full object-cover sketch-animate-1"
-          />
-        </div>
 
         {/* YouTube Section */}
-        <section className="mb-32">
-          <div className="flex items-baseline justify-between mb-12">
-            <div className="flex items-baseline gap-4">
-              <span className="text-xs font-headline tracking-[0.4em] uppercase text-primary/40">
-                01
-              </span>
-              <h2 className="text-2xl font-headline tracking-widest uppercase">
-                YouTube
-              </h2>
-            </div>
-            <Link
-              href="/youtube"
-              className="text-xs tracking-widest uppercase text-primary/50 hover:text-on-background transition-colors border-b border-primary/20 pb-1"
-            >
-              View All
-            </Link>
-          </div>
+        <YouTubeSection
+          featured={featuredYT ?? null}
+          subItems={subYT}
+        />
 
-          <div className="grid grid-cols-12 gap-8 md:gap-12">
-            {featuredYT && (
-              <a
-                href={featuredYT.youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="col-span-12 md:col-span-8 group relative block"
-              >
-                <div className="aspect-video bg-surface-container overflow-hidden relative">
-                  <img
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
-                    src={featuredYT.thumbnailUrl}
-                    alt={featuredYT.title}
-                  />
-                  <div className="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors duration-500" />
-                  <div className="absolute bottom-8 left-8">
-                    <span className="bg-primary text-on-primary px-4 py-1 text-[10px] tracking-widest uppercase">
-                      Latest Release
-                    </span>
-                  </div>
-                </div>
-                <div className="mt-6 flex justify-between items-start">
-                  <div>
-                    <h3 className="text-2xl md:text-3xl font-headline mb-2 tracking-tight">
-                      {featuredYT.title}
-                    </h3>
-                    <p className="text-sm font-extralight text-on-surface-variant max-w-lg">
-                      {featuredYT.description}
-                    </p>
-                  </div>
-                  <span className="material-symbols-outlined text-3xl font-extralight shrink-0 ml-4">
-                    play_circle
-                  </span>
-                </div>
-              </a>
-            )}
-
-            <div className="col-span-12 md:col-span-4 flex flex-col gap-8 md:gap-12">
-              {subYT.map((item) => (
-                <a
-                  key={item.id}
-                  href={item.youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group"
-                >
-                  <div className="aspect-video bg-surface-container overflow-hidden mb-4">
-                    <img
-                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
-                      src={item.thumbnailUrl}
-                      alt={item.title}
-                    />
-                  </div>
-                  <h4 className="font-headline text-lg mb-1 tracking-wide">
-                    {item.title}
-                  </h4>
-                  <p className="text-[10px] font-body font-light tracking-widest uppercase text-outline">
-                    {item.duration} — {item.category}
-                  </p>
-                </a>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Sketch Divider: YouTube → Podcast */}
-        <div className="w-full h-32 md:h-48 opacity-[0.15] pointer-events-none overflow-hidden my-8">
-          <img
-            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/images/textures/sketch-02.jpg`}
-            alt=""
-            className="w-full h-full object-cover object-center sketch-animate-2"
-          />
-        </div>
 
         {/* Podcast Section */}
         <section className="mb-32">
@@ -225,14 +132,6 @@ export default function ArchivePage() {
           </div>
         </section>
 
-        {/* Sketch Divider: Podcast → Journal */}
-        <div className="w-full h-32 md:h-48 opacity-[0.15] pointer-events-none overflow-hidden my-8">
-          <img
-            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/images/textures/sketch-03.jpg`}
-            alt=""
-            className="w-full h-full object-cover object-center sketch-animate-3"
-          />
-        </div>
 
         {/* Journal Section */}
         <section className="mb-24">
@@ -331,14 +230,6 @@ export default function ArchivePage() {
         </section>
       </div>
 
-      {/* Abstract Signature Texture */}
-      <div className="w-full opacity-[0.2] py-8 overflow-hidden pointer-events-none">
-        <img
-          src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/images/textures/sketch-04.jpg`}
-          alt=""
-          className="w-full h-40 md:h-56 object-cover object-center sketch-animate-4"
-        />
-      </div>
     </>
   );
 }

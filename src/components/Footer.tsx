@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="w-full mt-24 bg-surface-container-low border-t border-primary/10">
       <div className="flex flex-col md:flex-row justify-between items-center w-full px-6 md:px-12 py-16 gap-8">
         <div className="text-sm font-headline italic text-primary">
-          MA — The Space Between
+          間｜MA
         </div>
         <div className="flex gap-12">
           <Link
@@ -28,7 +28,7 @@ export function Footer() {
           </Link>
         </div>
         <div className="font-body font-light tracking-widest text-[10px] uppercase text-primary">
-          &copy; MA — The Space Between
+          &copy; 間｜MA
         </div>
       </div>
     </footer>

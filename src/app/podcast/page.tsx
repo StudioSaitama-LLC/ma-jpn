@@ -29,7 +29,7 @@ export default function PodcastPage() {
           </h1>
         </div>
         <p className="font-body font-extralight text-base max-w-md text-on-surface-variant leading-relaxed tracking-wide">
-          Conversations on silence, creativity, and the philosophy of space.
+          沈黙、創造、余白の思想をめぐる対話。
         </p>
         <div className="mt-8 w-32 h-[1px] bg-outline-variant/30" />
       </div>
