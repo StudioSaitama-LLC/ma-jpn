@@ -1,27 +1,27 @@
 import type { Metadata } from "next";
-import { Noto_Serif, Plus_Jakarta_Sans } from "next/font/google";
+import { Shippori_Mincho, EB_Garamond } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { GrainOverlay } from "@/components/GrainOverlay";
 
-const notoSerif = Noto_Serif({
-  variable: "--font-noto-serif",
+const shipporiMincho = Shippori_Mincho({
+  variable: "--font-shippori-mincho",
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const ebGaramond = EB_Garamond({
+  variable: "--font-eb-garamond",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
 });
 
-const plusJakarta = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta",
-  subsets: ["latin"],
-  weight: ["200", "300", "400", "600"],
-});
-
 export const metadata: Metadata = {
-  title: "MA - The Space Between",
+  title: "間｜MA",
   description:
-    "A curated collection of silence, sound, and the space in between. Atmospheric fragments of a quiet life.",
+    "立ち止まること。余白を残すこと。すぐに、意味を求めないこと。",
 };
 
 export default function RootLayout({
@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     <html
       lang="ja"
-      className={`${notoSerif.variable} ${plusJakarta.variable} antialiased`}
+      className={`${shipporiMincho.variable} ${ebGaramond.variable} antialiased`}
     >
       <head>
         <link

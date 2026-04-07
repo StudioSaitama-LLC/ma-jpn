@@ -68,9 +68,9 @@
   --color-surface-tint: #5f5e5e;
 
   /* Typography */
-  --font-headline: "Noto Serif", serif;
-  --font-body: "Plus Jakarta Sans", sans-serif;
-  --font-label: "Plus Jakarta Sans", sans-serif;
+  --font-headline: "Shippori Mincho", "Yu Mincho", serif;
+  --font-body: "Shippori Mincho", "Yu Mincho", serif;
+  --font-label: "EB Garamond", "Garamond Premier Pro", serif;
 
   /* Border Radius - All 0px for architectural feel */
   --radius-sm: 0px;
@@ -95,7 +95,7 @@
 
 /* MA Watermark */
 .ma-watermark {
-  font-family: "Noto Serif", serif;
+  font-family: "Shippori Mincho", "Yu Mincho", serif;
   writing-mode: vertical-rl;
   text-orientation: upright;
   user-select: none;
@@ -188,6 +188,35 @@
   color: #525251;
 }
 
+/* Video Viewer Overlay */
+.video-viewer-overlay {
+  animation: viewer-fade-in 0.3s ease-out;
+}
+
+.video-viewer-content {
+  animation: viewer-slide-up 0.3s ease-out;
+}
+
+@keyframes viewer-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes viewer-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
@@ -196,5 +225,5 @@ html {
 body {
   background: #fbf9f4;
   color: #31332c;
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: "Shippori Mincho", "Yu Mincho", serif;
 }

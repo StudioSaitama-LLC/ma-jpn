@@ -36,6 +36,26 @@ export function getFeaturedNote(): NoteItem | undefined {
   return getNoteItems().find((item) => item.featured);
 }
 
+export function getYouTubeItemById(id: string): YouTubeItem | undefined {
+  return getYouTubeItems().find((item) => item.id === id);
+}
+
+export function getRelatedYouTube(
+  item: YouTubeItem,
+  limit: number = 3
+): YouTubeItem[] {
+  const allItems = getYouTubeItems().filter((i) => i.id !== item.id);
+  const scored = allItems.map((candidate) => {
+    let score = 0;
+    if (candidate.category === item.category) score += 2;
+    const sharedTags = candidate.tags.filter((t) => item.tags.includes(t));
+    score += sharedTags.length;
+    return { item: candidate, score };
+  });
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, limit).map((s) => s.item);
+}
+
 export function getAllTags(): string[] {
   const tags = new Set<string>();
   getYouTubeItems().forEach((item) => item.tags.forEach((t) => tags.add(t)));
