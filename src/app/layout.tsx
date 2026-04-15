@@ -1,21 +1,20 @@
 import type { Metadata } from "next";
-import { Shippori_Mincho, EB_Garamond } from "next/font/google";
+import { Noto_Sans_JP, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { GrainOverlay } from "@/components/GrainOverlay";
 
-const shipporiMincho = Shippori_Mincho({
-  variable: "--font-shippori-mincho",
+const notoSansJP = Noto_Sans_JP({
+  variable: "--font-noto-sans-jp",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["200", "300", "400"],
 });
 
-const ebGaramond = EB_Garamond({
-  variable: "--font-eb-garamond",
+const sourceSans3 = Source_Sans_3({
+  variable: "--font-source-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
+  weight: ["200", "300", "400"],
 });
 
 export const metadata: Metadata = {
@@ -32,7 +31,7 @@ export default function RootLayout({
   return (
     <html
       lang="ja"
-      className={`${shipporiMincho.variable} ${ebGaramond.variable} antialiased`}
+      className={`${notoSansJP.variable} ${sourceSans3.variable} antialiased`}
     >
       <head>
         <link

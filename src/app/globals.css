@@ -68,9 +68,9 @@
   --color-surface-tint: #5f5e5e;
 
   /* Typography */
-  --font-headline: "Shippori Mincho", "Yu Mincho", serif;
-  --font-body: "Shippori Mincho", "Yu Mincho", serif;
-  --font-label: "EB Garamond", "Garamond Premier Pro", serif;
+  --font-headline: "Noto Sans JP", "Source Sans 3", sans-serif;
+  --font-body: "Noto Sans JP", "Source Sans 3", sans-serif;
+  --font-label: "Source Sans 3", "Noto Sans JP", sans-serif;
 
   /* Border Radius - All 0px for architectural feel */
   --radius-sm: 0px;
@@ -95,7 +95,7 @@
 
 /* MA Watermark */
 .ma-watermark {
-  font-family: "Shippori Mincho", "Yu Mincho", serif;
+  font-family: "Noto Sans JP", "Source Sans 3", sans-serif;
   writing-mode: vertical-rl;
   text-orientation: upright;
   user-select: none;
@@ -225,5 +225,5 @@ html {
 body {
   background: #fbf9f4;
   color: #31332c;
-  font-family: "Shippori Mincho", "Yu Mincho", serif;
+  font-family: "Noto Sans JP", "Source Sans 3", sans-serif;
 }
