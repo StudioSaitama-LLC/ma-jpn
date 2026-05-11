@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>間 Reference Room — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f2eee2;
+    --paper: #fbf9f3;
+    --paper-aged: #efe9d8;
+    --ink: #1c1a17;
+    --ink-soft: #4a4540;
+    --ink-mute: #8a8278;
+    --rule: #d8d1c2;
+    --accent: #8b1a1a;
+    --visual: #b7826a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { height: 100%; }
+  body {
+    font-family: "Shippori Mincho", serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(242, 238, 226, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+    padding: 1.4rem 2.5rem;
+  }
+  .top-bar .row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .top-bar .title {
+    font-size: 1.1rem;
+    letter-spacing: 0.08em;
+  }
+  .top-bar .title .ma {
+    border: 1px solid var(--ink);
+    padding: 0.05em 0.4em;
+    margin-right: 0.3em;
+  }
+  .top-bar .crumb {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    color: var(--ink-mute);
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+  }
+  .top-bar .nav-links {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--ink-mute);
+  }
+  .top-bar .nav-links a {
+    color: var(--ink-mute);
+    text-decoration: none;
+    margin-left: 1.5rem;
+  }
+  .top-bar .nav-links a:hover { color: var(--accent); }
+
+  .filter-row {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.4rem 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-row .label {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    color: var(--ink-mute);
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    margin-right: 0.5rem;
+  }
+  .chip {
+    padding: 0.3em 0.9em;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    border-radius: 100px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    transition: all 0.2s ease;
+    font-family: "Shippori Mincho", serif;
+  }
+  .chip:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+  .chip.active {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .chip.clear {
+    border-style: dashed;
+    color: var(--ink-mute);
+  }
+
+  /* Hero strip */
+  .hero {
+    padding: 4rem 2.5rem 2rem;
+    max-width: 760px;
+  }
+  .hero .eyebrow {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    color: var(--ink-mute);
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-size: 2.4rem;
+    font-weight: 500;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    letter-spacing: 0.04em;
+  }
+  .hero p {
+    color: var(--ink-soft);
+    line-height: 2.1;
+    font-size: 1rem;
+  }
+  .hero .meta {
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--ink-mute);
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    letter-spacing: 0.04em;
+  }
+
+  /* Card field */
+  .field {
+    position: relative;
+    padding: 3rem 2.5rem 6rem;
+    perspective: 1200px;
+  }
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 2.5rem 2rem;
+    transform-style: preserve-3d;
+  }
+
+  .card {
+    background: var(--paper);
+    padding: 1.8rem 1.6rem 1.4rem;
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.45s cubic-bezier(.2,.7,.3,1);
+    box-shadow: 2px 4px 0 rgba(28,26,23,0.04);
+    transform-origin: center center;
+  }
+  .card[data-era="ancient"] { background: var(--paper-aged); }
+  .card[data-era="medieval"] { background: #f0ebda; }
+  .card[data-era="modern"] { background: var(--paper); }
+  .card[data-era="contemporary"] { background: #faf7ed; }
+
+  .card:nth-child(3n) { transform: rotate(-0.6deg); }
+  .card:nth-child(3n+1) { transform: rotate(0.4deg); }
+  .card:nth-child(3n+2) { transform: rotate(-0.2deg); }
+  .card:nth-child(5n) { transform: rotate(0.8deg) translateY(8px); }
+  .card:nth-child(7n) { transform: rotate(-0.5deg) translateY(-4px); }
+
+  .card:hover {
+    transform: translateY(-6px) rotate(0deg);
+    box-shadow: 6px 12px 30px rgba(28,26,23,0.08);
+    border-color: var(--ink);
+    z-index: 2;
+  }
+  .card.dimmed {
+    opacity: 0.18;
+    filter: grayscale(0.6);
+  }
+  .card.highlighted {
+    border-color: var(--accent);
+    box-shadow: 4px 8px 0 rgba(139,26,26,0.08);
+  }
+
+  .card .era-tag {
+    position: absolute;
+    top: -0.6rem;
+    right: 1rem;
+    background: var(--bg);
+    padding: 0.1em 0.5em;
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-size: 0.7rem;
+    color: var(--ink-mute);
+    letter-spacing: 0.08em;
+  }
+
+  .card .source {
+    font-size: 0.8rem;
+    color: var(--ink-mute);
+    margin-bottom: 0.8rem;
+    line-height: 1.5;
+  }
+  .card .source .author {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .card .title-line {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    margin-bottom: 1rem;
+    font-style: italic;
+  }
+  .card .quote {
+    font-size: 0.95rem;
+    line-height: 1.85;
+    color: var(--ink);
+    margin-bottom: 1.2rem;
+    position: relative;
+    padding-left: 0.8rem;
+    border-left: 1px solid var(--rule);
+  }
+  .card.highlighted .quote {
+    border-left-color: var(--accent);
+  }
+  .card .keywords {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+    padding-top: 0.9rem;
+    border-top: 1px dashed var(--rule);
+  }
+  .card .keywords span {
+    font-size: 0.72rem;
+    color: var(--ink-mute);
+    padding: 0.1em 0.5em;
+    background: rgba(28,26,23,0.04);
+    border-radius: 100px;
+  }
+  .card.highlighted .keywords span.match {
+    color: var(--accent);
+    background: rgba(139,26,26,0.08);
+    font-weight: 500;
+  }
+
+  /* Modal */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(28,26,23,0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    overflow-y: auto;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--paper);
+    max-width: 640px;
+    width: 100%;
+    padding: 3.5rem 3rem 3rem;
+    position: relative;
+    border: 1px solid var(--rule);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  .modal .close {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.4rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1.4rem;
+    color: var(--ink-mute);
+    font-family: "EB Garamond", serif;
+  }
+  .modal .close:hover { color: var(--ink); }
+  .modal .era {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    color: var(--ink-mute);
+    letter-spacing: 0.06em;
+    font-size: 0.85rem;
+    margin-bottom: 0.8rem;
+  }
+  .modal h2 {
+    font-size: 1.6rem;
+    font-weight: 500;
+    line-height: 1.5;
+    margin-bottom: 0.6rem;
+    letter-spacing: 0.03em;
+  }
+  .modal .source-line {
+    color: var(--ink-soft);
+    margin-bottom: 2.5rem;
+    font-size: 0.9rem;
+  }
+  .modal blockquote {
+    font-size: 1.05rem;
+    line-height: 2.2;
+    padding: 1.6rem 1.8rem;
+    margin: 1.5rem 0 2rem;
+    background: var(--bg);
+    border-left: 2px solid var(--accent);
+  }
+  .modal .commentary {
+    color: var(--ink-soft);
+    line-height: 2;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+  }
+  .modal .links-section {
+    border-top: 1px solid var(--rule);
+    padding-top: 1.5rem;
+    margin-top: 2rem;
+  }
+  .modal .links-section .label {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    color: var(--ink-mute);
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.8rem;
+  }
+  .modal .keyword-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .modal .keyword-links a {
+    padding: 0.4em 0.9em;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  .modal .keyword-links a:hover {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  /* Status bar */
+  .status {
+    position: fixed;
+    bottom: 1.6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 0.6rem 1.4rem;
+    border-radius: 100px;
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.05em;
+    z-index: 15;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.04);
+  }
+  .status strong {
+    font-style: normal;
+    font-weight: 500;
+    color: var(--ink);
+    font-family: "Shippori Mincho", serif;
+  }
+
+  /* Mode toggle */
+  .mode-toggle {
+    display: inline-flex;
+    border: 1px solid var(--rule);
+    border-radius: 100px;
+    overflow: hidden;
+    margin-left: 1rem;
+  }
+  .mode-toggle button {
+    background: transparent;
+    border: none;
+    padding: 0.3em 0.9em;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--ink-mute);
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    letter-spacing: 0.05em;
+  }
+  .mode-toggle button.active {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  /* Scattered (dig) mode */
+  body.dig-mode .field-grid {
+    display: block;
+    position: relative;
+    min-height: 1600px;
+  }
+  body.dig-mode .card {
+    position: absolute;
+    width: 260px;
+  }
+
+  @media (max-width: 640px) {
+    .hero { padding: 2rem 1.4rem 1rem; }
+    .hero h1 { font-size: 1.6rem; }
+    .field { padding: 2rem 1.4rem 6rem; }
+    .field-grid { gap: 1.6rem 1rem; grid-template-columns: 1fr; }
+    .top-bar { padding: 1rem 1.4rem; }
+    .modal { padding: 2.5rem 1.8rem; }
+    .mode-toggle { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="row">
+    <div style="display: flex; align-items: baseline; gap: 1.5rem;">
+      <div class="title"><span class="ma">間</span>Reference Room</div>
+      <div class="crumb">prototype · 「間」の資料庫</div>
+    </div>
+    <div class="nav-links">
+      <a href="../dictionary/">← 辞書へ戻る</a>
+      <a href="../architecture/">全体構想へ</a>
+    </div>
+  </div>
+  <div class="filter-row" id="filters">
+    <span class="label">filter by:</span>
+    <!-- chips injected -->
+  </div>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">prototype · 2026.05</div>
+  <h1>間の資料を、ディグする。</h1>
+  <p>
+    哲学、芸能、建築、デザイン、文学。<br/>
+    時代も領域も越えて、「間」が現れてきた場所を集めた部屋。<br/>
+    上の見出しを引くと、関係する資料が浮かび上がる。
+  </p>
+  <div class="meta">
+    14 cards · linked to <a href="../dictionary/" style="color:var(--ink-mute);">dictionary</a>
+    <div class="mode-toggle" id="mode-toggle">
+      <button data-mode="grid" class="active">grid</button>
+      <button data-mode="dig">dig</button>
+    </div>
+  </div>
+</div>
+
+<div class="field">
+  <div class="field-grid" id="grid"></div>
+</div>
+
+<div class="modal-bg" id="modal-bg">
+  <div class="modal" id="modal"></div>
+</div>
+
+<div class="status" id="status">14 / 14 cards</div>
+
+<script>
+// =========================================================
+//  Reference data
+// =========================================================
+const refs = [
+  {
+    id: 'r-nishida',
+    era: 'modern',
+    eraLabel: '1911',
+    author: '西田幾多郎',
+    title: '『善の研究』',
+    titleLine: '純粋経験について',
+    quote: '経験するというのは事実其侭(そのまま)に知るの意である。全く自己の細工を棄て、事実に従うて知るのである。',
+    commentary: '主観と客観が分かれる以前の経験。「間」が定義する「立ち止まる」とは、まさにこの細工を棄てる行為に近い。',
+    keywords: ['取捨', '余白', '平場'],
+  },
+  {
+    id: 'r-rikyu',
+    era: 'medieval',
+    eraLabel: '16c.',
+    author: '千利休',
+    title: '南方録',
+    titleLine: '茶の湯の心得',
+    quote: '家は漏らぬほど、食事は飢えぬほどにてたることなり。これ仏の教へ、茶の湯の本意なり。',
+    commentary: '足ることを知る、ということ。間は、足りているという認識から始まる。',
+    keywords: ['余白', '取捨', '沈黙'],
+  },
+  {
+    id: 'r-suzuki',
+    era: 'modern',
+    eraLabel: '1938',
+    author: '鈴木大拙',
+    title: '『禅と日本文化』',
+    titleLine: '茶と禅の沈黙',
+    quote: '茶室の沈黙は、虚しい沈黙ではない。それはすべてを孕んだ沈黙であり、何かを語る前の沈黙である。',
+    commentary: '不在ではなく、満ちている沈黙。dictionary における「沈黙」「茶室の影」の根拠の一つ。',
+    keywords: ['沈黙', '茶室の影'],
+  },
+  {
+    id: 'r-tanizaki',
+    era: 'modern',
+    eraLabel: '1933',
+    author: '谷崎潤一郎',
+    title: '『陰翳礼讃』',
+    titleLine: '陰翳の中の美',
+    quote: '美は物体にあるのではなく、物体と物体との作り出す陰翳のあや、明暗にあると考える。',
+    commentary: '間とは「物体と物体のあいだ」が作るものである、という直接的な指摘。',
+    keywords: ['隙間', '境界', '茶室の影'],
+  },
+  {
+    id: 'r-ozu',
+    era: 'modern',
+    eraLabel: '1953',
+    author: '小津安二郎',
+    title: '『東京物語』ピロー・ショット',
+    titleLine: '物語の合間に挿入される無人のカット',
+    quote: 'カットとカットのあいだに、なにも起こらないショットを置く。観客はそこで一度息を整える。物語ではなく、物語のあいだが映画なのだ。',
+    commentary: '映像における「間」の発明。リズムは音ではなく、音と音のあいだにある。',
+    keywords: ['リズム', '朝の畳', '呼吸'],
+  },
+  {
+    id: 'r-miyake',
+    era: 'contemporary',
+    eraLabel: '1980s',
+    author: '三宅一生',
+    title: 'A-POC philosophy',
+    titleLine: '一枚の布と身体のあいだ',
+    quote: '服と身体のあいだに空気を入れる。服はそれ自体で完結せず、纏う人との隙間で完成する。',
+    commentary: '物理的な隙間が、人と物の関係を成立させる。間 do（装置）の設計思想の源泉。',
+    keywords: ['隙間', '呼吸', '境界'],
+  },
+  {
+    id: 'r-shirakawa',
+    era: 'modern',
+    eraLabel: '1996',
+    author: '白川静',
+    title: '『字統』',
+    titleLine: '「間」字の成り立ち',
+    quote: '間は門と月との会意。閉じた門のすきまから月光が差し入る形を象る。閉じているものに、わずかに開いた場所がある。',
+    commentary: '漢字そのものが、すでに「間」の本質を持っている。閉鎖の中の開口、それが間。',
+    keywords: ['隙間', '余白', '雲の合間'],
+  },
+  {
+    id: 'r-soushi',
+    era: 'ancient',
+    eraLabel: 'BC 4c.',
+    author: '荘子',
+    title: '『斉物論』',
+    titleLine: '朝三暮四',
+    quote: '名と実とは未だ虧(か)けず、而(しか)も喜怒のために用ふ。',
+    commentary: '同じものが、配置の違いで違って見える。間とは、配置を変える余白のことでもある。',
+    keywords: ['取捨', '平場', '境界'],
+  },
+  {
+    id: 'r-basho',
+    era: 'medieval',
+    eraLabel: '1689',
+    author: '松尾芭蕉',
+    title: '『おくのほそ道』',
+    titleLine: '平泉にて',
+    quote: '夏草や 兵(つわもの)どもが 夢の跡',
+    commentary: '人が消えたあとに残る空間。「雪原の足跡」と同じく、不在が場所を作る。',
+    keywords: ['雪原の足跡', '沈黙', '待つ'],
+  },
+  {
+    id: 'r-dogen',
+    era: 'medieval',
+    eraLabel: '1240',
+    author: '道元',
+    title: '『正法眼蔵』有時',
+    titleLine: '時間と存在の不可分',
+    quote: '有時(うじ)は、すなはち時すでにこれ有なり、有はみな時なり。',
+    commentary: '存在と時間が同じものであるなら、待つこともまた存在することである。',
+    keywords: ['待つ', '呼吸'],
+  },
+  {
+    id: 'r-kashima',
+    era: 'contemporary',
+    eraLabel: '2000',
+    author: '加島祥造',
+    title: '『タオ ─ 老子』',
+    titleLine: '水のように暮らす',
+    quote: 'いちばん良い生き方は 水のような生き方だ。水は それぞれの人を 養い育てる が おしつけがましくない。',
+    commentary: '主張せず、しかし届く。これは「広める」の理想形でもある。',
+    keywords: ['呼吸', '平場', 'ゆら'],
+  },
+  {
+    id: 'r-mushanokoji',
+    era: 'modern',
+    eraLabel: '1920',
+    author: '武者小路実篤',
+    title: 'メモ',
+    titleLine: '関係のあいだに',
+    quote: '君は君 我は我 されど仲よき',
+    commentary: '混ざらず、しかし通じる。「平場」と「隙間」が同時に成立する状態の素描。',
+    keywords: ['平場', '隙間', '境界'],
+  },
+  {
+    id: 'r-higashiyama',
+    era: 'modern',
+    eraLabel: '1972',
+    author: '東山魁夷',
+    title: '『道』に寄せて',
+    titleLine: '雪の道について',
+    quote: '何もない雪の道を描いた。何もないからこそ、見る人が自分の旅をその上に重ねることができる。',
+    commentary: '描かないことで描く。余白の書、雪原の足跡の根拠となる絵画思想。',
+    keywords: ['余白', '余白の書', '雪原の足跡'],
+  },
+  {
+    id: 'r-yamaguchi',
+    era: 'modern',
+    eraLabel: '1955',
+    author: '山口蓬春',
+    title: '『新日本画の道』',
+    titleLine: '余白の積極性',
+    quote: '余白はただの空白ではない。そこに描かれたものを支える、もうひとつの主役である。',
+    commentary: 'dictionary 上の「余白の書」の直接の出典候補。',
+    keywords: ['余白', '余白の書'],
+  },
+];
+
+// =========================================================
+//  Build keyword chips
+// =========================================================
+const allKeywords = [...new Set(refs.flatMap(r => r.keywords))].sort();
+const filterContainer = document.getElementById('filters');
+
+allKeywords.forEach(kw => {
+  const chip = document.createElement('button');
+  chip.className = 'chip';
+  chip.textContent = kw;
+  chip.dataset.kw = kw;
+  chip.addEventListener('click', () => toggleFilter(kw));
+  filterContainer.appendChild(chip);
+});
+
+const clearBtn = document.createElement('button');
+clearBtn.className = 'chip clear';
+clearBtn.textContent = 'すべて';
+clearBtn.addEventListener('click', () => { activeFilters.clear(); refresh(); });
+filterContainer.appendChild(clearBtn);
+
+// =========================================================
+//  Render cards
+// =========================================================
+const grid = document.getElementById('grid');
+
+function eraToLabel(era) {
+  return { ancient: '古代', medieval: '中世', modern: '近代', contemporary: '現代' }[era];
+}
+
+refs.forEach(r => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.dataset.era = r.era;
+  card.dataset.id = r.id;
+
+  card.innerHTML = `
+    <div class="era-tag">${r.eraLabel} · ${eraToLabel(r.era)}</div>
+    <div class="source">
+      <span class="author">${r.author}</span><br/>
+      ${r.title}
+    </div>
+    <div class="title-line">${r.titleLine}</div>
+    <div class="quote">${r.quote}</div>
+    <div class="keywords">
+      ${r.keywords.map(k => `<span data-kw="${k}">${k}</span>`).join('')}
+    </div>
+  `;
+
+  card.addEventListener('click', () => openModal(r));
+  grid.appendChild(card);
+});
+
+// =========================================================
+//  Filter logic
+// =========================================================
+const activeFilters = new Set();
+const status = document.getElementById('status');
+
+function toggleFilter(kw) {
+  if (activeFilters.has(kw)) activeFilters.delete(kw);
+  else activeFilters.add(kw);
+  refresh();
+}
+
+function refresh() {
+  // Update chips
+  filterContainer.querySelectorAll('.chip[data-kw]').forEach(c => {
+    c.classList.toggle('active', activeFilters.has(c.dataset.kw));
+  });
+
+  if (activeFilters.size === 0) {
+    grid.querySelectorAll('.card').forEach(card => {
+      card.classList.remove('dimmed', 'highlighted');
+      card.querySelectorAll('.keywords span').forEach(s => s.classList.remove('match'));
+    });
+    status.innerHTML = `${refs.length} / ${refs.length} cards`;
+    return;
+  }
+
+  let visible = 0;
+  refs.forEach(r => {
+    const card = grid.querySelector(`[data-id="${r.id}"]`);
+    const matches = r.keywords.some(k => activeFilters.has(k));
+    if (matches) {
+      card.classList.add('highlighted');
+      card.classList.remove('dimmed');
+      visible++;
+    } else {
+      card.classList.add('dimmed');
+      card.classList.remove('highlighted');
+    }
+    card.querySelectorAll('.keywords span').forEach(s => {
+      s.classList.toggle('match', activeFilters.has(s.dataset.kw));
+    });
+  });
+  status.innerHTML = `<strong>${visible}</strong> / ${refs.length} cards · ${[...activeFilters].join(' · ')}`;
+}
+
+// =========================================================
+//  Modal
+// =========================================================
+const modalBg = document.getElementById('modal-bg');
+const modalEl = document.getElementById('modal');
+
+function openModal(r) {
+  modalEl.innerHTML = `
+    <button class="close" aria-label="close">×</button>
+    <div class="era">${r.eraLabel} · ${eraToLabel(r.era)}</div>
+    <h2>${r.title}</h2>
+    <div class="source-line">${r.author} ・ <em>${r.titleLine}</em></div>
+    <blockquote>${r.quote}</blockquote>
+    <p class="commentary">${r.commentary}</p>
+    <div class="links-section">
+      <div class="label">辞書のこの語に紐づく</div>
+      <div class="keyword-links">
+        ${r.keywords.map(k => `<a href="../dictionary/?keyword=${encodeURIComponent(k)}">${k}</a>`).join('')}
+      </div>
+    </div>
+  `;
+  modalBg.classList.add('open');
+  modalEl.querySelector('.close').addEventListener('click', closeModal);
+}
+
+function closeModal() {
+  modalBg.classList.remove('open');
+}
+
+modalBg.addEventListener('click', (e) => {
+  if (e.target === modalBg) closeModal();
+});
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// =========================================================
+//  Mode toggle: grid <-> dig (scattered)
+// =========================================================
+const modeToggle = document.getElementById('mode-toggle');
+modeToggle.querySelectorAll('button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    modeToggle.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (btn.dataset.mode === 'dig') enterDigMode();
+    else enterGridMode();
+  });
+});
+
+function enterGridMode() {
+  document.body.classList.remove('dig-mode');
+  grid.querySelectorAll('.card').forEach(c => {
+    c.style.left = '';
+    c.style.top = '';
+  });
+}
+
+function enterDigMode() {
+  document.body.classList.add('dig-mode');
+  // Scatter cards in a 2D space deterministically
+  refs.forEach((r, i) => {
+    const card = grid.querySelector(`[data-id="${r.id}"]`);
+    const col = i % 4;
+    const row = Math.floor(i / 4);
+    const jitterX = (Math.sin(i * 12.3) * 60);
+    const jitterY = (Math.cos(i * 7.7) * 40);
+    card.style.left = (col * 300 + jitterX + 40) + 'px';
+    card.style.top = (row * 280 + jitterY + 30) + 'px';
+  });
+}
+
+// =========================================================
+//  Deep-link: ?keyword=隙間 auto-applies filter
+// =========================================================
+const params = new URLSearchParams(window.location.search);
+if (params.has('keyword')) {
+  const kw = params.get('keyword');
+  if (allKeywords.includes(kw)) {
+    activeFilters.add(kw);
+    refresh();
+  }
+}
+</script>
+
+</body>
+</html>
