@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>間メディア 全体構想 — Architecture Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #f7f4ed;
+    --paper: #fbf9f3;
+    --ink: #1c1a17;
+    --ink-soft: #4a4540;
+    --ink-mute: #8a8278;
+    --rule: #d8d1c2;
+    --accent: #8b1a1a;
+    --accent-soft: #b7826a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Shippori Mincho", "EB Garamond", serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.9;
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 8rem 2rem 6rem;
+  }
+  header.hero {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 4rem;
+    margin-bottom: 5rem;
+  }
+  .eyebrow {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--ink-mute);
+    letter-spacing: 0.08em;
+    margin-bottom: 1.5rem;
+  }
+  h1 {
+    font-size: 3rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+    margin-bottom: 1.5rem;
+  }
+  h1 .ma {
+    display: inline-block;
+    border: 1px solid var(--ink);
+    padding: 0.1em 0.5em;
+    margin-right: 0.2em;
+  }
+  .lead {
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    max-width: 38em;
+    line-height: 2.1;
+  }
+  .meta {
+    margin-top: 2.5rem;
+    font-family: "EB Garamond", serif;
+    font-size: 0.9rem;
+    color: var(--ink-mute);
+    letter-spacing: 0.06em;
+  }
+  .meta span { margin-right: 1.5rem; }
+  h2 {
+    font-size: 1.7rem;
+    font-weight: 500;
+    margin-top: 5rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.04em;
+  }
+  h2 .num {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    color: var(--accent-soft);
+    margin-right: 0.6em;
+    font-weight: 400;
+  }
+  h2 + .sub {
+    color: var(--ink-mute);
+    font-style: italic;
+    font-family: "EB Garamond", serif;
+    margin-bottom: 2.5rem;
+    letter-spacing: 0.05em;
+  }
+  h3 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    color: var(--ink);
+  }
+  p { margin-bottom: 1.4rem; max-width: 38em; }
+  blockquote {
+    border-left: 2px solid var(--accent-soft);
+    padding: 0.4rem 0 0.4rem 1.5rem;
+    margin: 2rem 0;
+    color: var(--ink-soft);
+    font-size: 1rem;
+    max-width: 36em;
+  }
+  blockquote.statement {
+    border: none;
+    background: var(--paper);
+    padding: 2.5rem 3rem;
+    text-align: center;
+    font-size: 1.15rem;
+    line-height: 2.2;
+    margin: 3rem auto;
+    max-width: 36em;
+    position: relative;
+  }
+  blockquote.statement::before,
+  blockquote.statement::after {
+    content: "";
+    position: absolute;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 1px solid var(--ink-mute);
+  }
+  blockquote.statement::before { top: 1rem; left: 1rem; border-right: none; border-bottom: none; }
+  blockquote.statement::after { bottom: 1rem; right: 1rem; border-left: none; border-top: none; }
+
+  ul, ol { margin: 0 0 1.4rem 1.5rem; max-width: 38em; }
+  li { margin-bottom: 0.4rem; }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+  }
+  th, td {
+    border-bottom: 1px solid var(--rule);
+    padding: 0.9rem 0.8rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    border-bottom: 2px solid var(--ink);
+    font-weight: 500;
+    color: var(--ink-soft);
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    letter-spacing: 0.04em;
+  }
+
+  .viz {
+    margin: 3rem 0;
+    padding: 2rem 1rem;
+    background: var(--paper);
+    border-radius: 2px;
+  }
+  .viz .caption {
+    text-align: center;
+    color: var(--ink-mute);
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    letter-spacing: 0.04em;
+  }
+
+  .mermaid { background: transparent; text-align: center; }
+
+  .stages {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 3rem 0;
+  }
+  .stage-card {
+    background: var(--paper);
+    padding: 2rem 1.4rem;
+    text-align: center;
+    border-top: 2px solid var(--ink);
+  }
+  .stage-card .label {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    color: var(--ink-mute);
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.6rem;
+  }
+  .stage-card .verb {
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin-bottom: 1.2rem;
+  }
+  .stage-card .unit {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    letter-spacing: 0.08em;
+  }
+  .stage-card .unit em {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 0.85em;
+  }
+  .stage-card .role {
+    color: var(--ink-mute);
+    font-size: 0.9rem;
+    margin-bottom: 1.4rem;
+  }
+  .stage-card .subs {
+    border-top: 1px dashed var(--rule);
+    padding-top: 1rem;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    line-height: 1.8;
+  }
+
+  .keyword-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.2rem;
+    justify-content: center;
+    margin: 3rem 0;
+    padding: 2.5rem 1rem;
+    background: var(--paper);
+  }
+  .keyword-cloud span {
+    font-size: 1.1rem;
+    color: var(--ink);
+    padding: 0.2em 0.6em;
+  }
+  .keyword-cloud span:nth-child(odd) {
+    font-size: 1.4rem;
+    color: var(--accent);
+  }
+  .keyword-cloud span:nth-child(3n) {
+    color: var(--ink-mute);
+    font-size: 0.95rem;
+  }
+
+  .timeline {
+    margin: 3rem 0;
+    position: relative;
+    padding-left: 2rem;
+  }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--rule);
+  }
+  .tl-entry {
+    position: relative;
+    margin-bottom: 2.5rem;
+  }
+  .tl-entry::before {
+    content: "";
+    position: absolute;
+    left: -1.7rem;
+    top: 0.5rem;
+    width: 9px;
+    height: 9px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .tl-date {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    font-size: 0.95rem;
+    margin-bottom: 0.3rem;
+  }
+  .tl-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  .tl-body {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    max-width: 36em;
+  }
+
+  footer.foot {
+    margin-top: 6rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.85rem;
+    color: var(--ink-mute);
+    text-align: center;
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    letter-spacing: 0.06em;
+  }
+
+  .nav {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    font-size: 0.8rem;
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    text-align: right;
+    color: var(--ink-mute);
+    letter-spacing: 0.05em;
+    line-height: 2.4;
+    z-index: 10;
+  }
+  .nav a {
+    color: var(--ink-mute);
+    text-decoration: none;
+    display: block;
+    transition: color 0.2s;
+  }
+  .nav a:hover { color: var(--accent); }
+  .nav a .n { color: var(--ink); margin-right: 0.4em; font-style: normal; }
+
+  @media (max-width: 900px) {
+    .nav { display: none; }
+    .page { padding: 4rem 1.4rem 4rem; }
+    h1 { font-size: 2.1rem; }
+    .stages { grid-template-columns: 1fr; }
+    blockquote.statement { padding: 2rem 1.5rem; font-size: 1rem; }
+  }
+
+  svg.figure { width: 100%; height: auto; display: block; }
+  svg text { font-family: "Shippori Mincho", serif; }
+
+  /* Embedded prototype frames */
+  .proto {
+    margin: 3rem -4rem;
+    position: relative;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+  }
+  .proto .frame-head {
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--rule);
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--ink-mute);
+    letter-spacing: 0.06em;
+  }
+  .proto .frame-head .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-right: 0.5rem;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .proto .frame-head a {
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px solid var(--ink-mute);
+    padding-bottom: 1px;
+    transition: border-color 0.2s;
+  }
+  .proto .frame-head a:hover { border-color: var(--accent); color: var(--accent); }
+  .proto iframe {
+    width: 100%;
+    height: 720px;
+    border: none;
+    display: block;
+    background: var(--bg);
+  }
+  .proto .frame-note {
+    padding: 0.9rem 1.5rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.82rem;
+    color: var(--ink-mute);
+    line-height: 1.7;
+    background: var(--paper);
+  }
+
+  @media (max-width: 900px) {
+    .proto { margin: 2rem -1.4rem; }
+    .proto iframe { height: 560px; }
+  }
+
+  /* Three-layer demo */
+  .tld {
+    position: relative;
+    margin: 3rem 0 0.5rem;
+    padding: 2.5rem 1.5rem 1rem;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    min-height: 420px;
+    overflow: hidden;
+  }
+  .tld-bg-spectrum {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to right,
+      rgba(183, 130, 106, 0.05) 0%,
+      rgba(183, 130, 106, 0.02) 33%,
+      rgba(28, 26, 23, 0.02) 66%,
+      rgba(28, 26, 23, 0.04) 100%
+    );
+    pointer-events: none;
+  }
+  .tld-cols {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2rem;
+    z-index: 2;
+  }
+  .tld-col {
+    display: flex;
+    flex-direction: column;
+  }
+  .tld-label {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--ink-mute);
+    text-align: center;
+    margin-bottom: 1.4rem;
+    letter-spacing: 0.06em;
+  }
+  .tld-label .dir {
+    color: var(--ink);
+    font-style: normal;
+    margin: 0 0.3em;
+  }
+  .tld-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    align-items: center;
+  }
+  .tld-item {
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.45s cubic-bezier(.2,.7,.3,1);
+    opacity: 0.55;
+    position: relative;
+    z-index: 3;
+  }
+  .tld-item:hover { opacity: 0.85; }
+  .tld-item.connected { opacity: 0.9; }
+  .tld-item.selected { opacity: 1; }
+
+  /* Visual: organic blob */
+  .tld-item.visual {
+    width: 110px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .tld-item.visual .blob {
+    position: absolute;
+    inset: 0;
+    background: var(--accent-soft);
+    opacity: 0.5;
+    transition: all 0.4s ease;
+  }
+  .tld-item.visual:nth-child(1) .blob { border-radius: 50% 40% 60% 45% / 55% 60% 40% 45%; transform: rotate(8deg); }
+  .tld-item.visual:nth-child(2) .blob { border-radius: 45% 55% 50% 50% / 60% 45% 55% 40%; transform: rotate(-12deg); }
+  .tld-item.visual:nth-child(3) .blob { border-radius: 60% 40% 45% 55% / 50% 60% 40% 50%; transform: rotate(15deg); }
+  .tld-item.visual:nth-child(4) .blob { border-radius: 40% 60% 55% 45% / 45% 55% 50% 50%; transform: rotate(-5deg); }
+  .tld-item.visual:nth-child(5) .blob { border-radius: 55% 45% 50% 50% / 40% 60% 50% 50%; transform: rotate(10deg); }
+  .tld-item.visual:nth-child(6) .blob { border-radius: 50% 50% 60% 40% / 55% 45% 55% 45%; transform: rotate(-8deg); }
+  .tld-item.visual.selected .blob {
+    opacity: 0.95;
+    transform: scale(1.08) rotate(0deg);
+  }
+  .tld-item.visual.connected .blob { opacity: 0.78; }
+  .tld-item.visual .label {
+    position: relative;
+    font-size: 0.85rem;
+    color: var(--ink);
+    z-index: 2;
+  }
+
+  /* Onomatopoeia: italic floating */
+  .tld-item.ono {
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--accent);
+    padding: 0.5em 1.1em;
+    border: 1px solid transparent;
+    border-radius: 100px;
+    transition: all 0.4s ease;
+  }
+  .tld-item.ono.selected {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    transform: scale(1.05);
+  }
+  .tld-item.ono.connected {
+    border-color: var(--accent);
+    background: rgba(139, 26, 26, 0.05);
+  }
+
+  /* Word: framed rect */
+  .tld-item.word {
+    font-size: 1rem;
+    color: var(--ink);
+    padding: 0.6em 1.4em;
+    border: 1px solid var(--rule);
+    background: var(--bg);
+    transition: all 0.4s ease;
+    min-width: 100px;
+    text-align: center;
+  }
+  .tld-item.word.selected {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+    transform: scale(1.05);
+    font-weight: 500;
+  }
+  .tld-item.word.connected {
+    border-color: var(--ink);
+    background: var(--paper);
+  }
+
+  .tld-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .tld-svg path {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  .tld-svg path.show { opacity: 0.35; }
+  .tld-svg path.show.strong { opacity: 0.7; stroke-width: 1.4; }
+
+  .tld-footer {
+    position: relative;
+    margin-top: 2rem;
+    padding-top: 1.2rem;
+    border-top: 1px dashed var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 4;
+  }
+  .tld-status {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--ink-mute);
+    letter-spacing: 0.05em;
+  }
+  .tld-status strong {
+    color: var(--ink);
+    font-style: normal;
+    font-weight: 500;
+    font-family: "Shippori Mincho", serif;
+  }
+  .tld-reset {
+    background: transparent;
+    border: 1px solid var(--rule);
+    padding: 0.4em 1em;
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    color: var(--ink-mute);
+    cursor: pointer;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+  .tld-reset:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  @media (max-width: 700px) {
+    .tld-cols { grid-template-columns: 1fr; gap: 1.4rem; }
+    .tld-label { margin-bottom: 0.6rem; }
+    .tld-svg { display: none; }
+    .tld { padding: 2rem 1rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="#hero"><span class="n">00</span> Statement</a>
+  <a href="#concept"><span class="n">01</span> Concept</a>
+  <a href="#architecture"><span class="n">02</span> Architecture</a>
+  <a href="#lab"><span class="n">03</span> 間 Lab</a>
+  <a href="#dictionary"><span class="n">04</span> Dictionary</a>
+  <a href="#reference-room"><span class="n">05</span> Reference Room</a>
+  <a href="#ch"><span class="n">06</span> 間 ch</a>
+  <a href="#do"><span class="n">07</span> 間 do</a>
+  <a href="#keywords"><span class="n">08</span> Keywords</a>
+  <a href="#timeline"><span class="n">09</span> Evolution</a>
+</nav>
+
+<div class="page">
+
+<header class="hero" id="hero">
+  <div class="eyebrow">Architecture Notes &nbsp;·&nbsp; 2026.04.30 — 2026.05.08</div>
+  <h1><span class="ma">間</span>メディア<br/>全体構想</h1>
+  <p class="lead">「間」という現象を、理論・感性の二軸から実証・定義化し、翻訳を兼ねた表現に置き換え、社会へ問い、その一般化を担い、各種装置への追随も担う。総合として、間を文化として暮らしにインストールすることを大義とするメディア。</p>
+  <div class="meta">
+    <span>2026.04.30 — 2026.05.08 · design notes</span>
+  </div>
+</header>
+
+<section id="concept">
+  <h2><span class="num">01</span>核となる二項</h2>
+  <p class="sub">"文"と"間" — 圧縮された言葉と、空間として残された言葉</p>
+
+  <p>「間」は、言葉として確定した「文」の対極にある。文がぎゅうぎゅうに圧縮された言葉なら、間はばらけて空間に浮かぶ言葉である。間メディアはこの両極を**論理と感覚の両方向から往復可能にする装置**として設計される。</p>
+
+  <div class="viz">
+    <svg class="figure" viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg">
+      <!-- 文 side: dense -->
+      <g transform="translate(170,180)">
+        <text text-anchor="middle" y="-130" font-size="22" fill="#1c1a17" letter-spacing="2">文</text>
+        <text text-anchor="middle" y="-105" font-size="11" fill="#8a8278" font-style="italic" font-family="EB Garamond">compressed</text>
+        <!-- packed circles -->
+        <g fill="#1c1a17">
+          <circle cx="-40" cy="-40" r="16"/>
+          <circle cx="-10" cy="-50" r="12"/>
+          <circle cx="20" cy="-38" r="14"/>
+          <circle cx="-30" cy="-15" r="13"/>
+          <circle cx="0" cy="-20" r="11"/>
+          <circle cx="25" cy="-10" r="15"/>
+          <circle cx="-40" cy="10" r="14"/>
+          <circle cx="-10" cy="15" r="12"/>
+          <circle cx="20" cy="20" r="13"/>
+          <circle cx="-25" cy="40" r="11"/>
+          <circle cx="5" cy="45" r="14"/>
+          <circle cx="30" cy="42" r="12"/>
+        </g>
+      </g>
+
+      <!-- arrow -->
+      <g transform="translate(400,180)">
+        <line x1="-60" y1="0" x2="60" y2="0" stroke="#8a8278" stroke-width="1" stroke-dasharray="4 4"/>
+        <text text-anchor="middle" y="-12" font-size="11" fill="#8a8278" font-style="italic" font-family="EB Garamond">spectrum</text>
+        <text text-anchor="middle" y="22" font-size="11" fill="#8a8278">論理 ⇄ 感覚</text>
+      </g>
+
+      <!-- 間 side: scattered with space -->
+      <g transform="translate(630,180)">
+        <text text-anchor="middle" y="-130" font-size="22" fill="#8b1a1a" letter-spacing="2">間</text>
+        <text text-anchor="middle" y="-105" font-size="11" fill="#8a8278" font-style="italic" font-family="EB Garamond">spaced</text>
+        <g fill="#1c1a17">
+          <circle cx="-60" cy="-50" r="8"/>
+          <circle cx="-10" cy="-70" r="6"/>
+          <circle cx="50" cy="-45" r="9"/>
+          <circle cx="-70" cy="-5" r="7"/>
+          <circle cx="40" cy="-5" r="6"/>
+          <circle cx="-20" cy="20" r="8"/>
+          <circle cx="60" cy="25" r="5"/>
+          <circle cx="-55" cy="45" r="6"/>
+          <circle cx="10" cy="55" r="7"/>
+          <circle cx="55" cy="60" r="8"/>
+          <circle cx="-10" cy="-15" r="4" opacity="0.5"/>
+          <circle cx="25" cy="35" r="4" opacity="0.5"/>
+        </g>
+        <!-- subtle outer scatter -->
+        <g fill="#8a8278" opacity="0.5">
+          <rect x="-90" y="-90" width="6" height="6"/>
+          <rect x="80" y="-75" width="6" height="6"/>
+          <rect x="-95" y="60" width="6" height="6"/>
+          <rect x="85" y="75" width="6" height="6"/>
+        </g>
+      </g>
+    </svg>
+    <div class="caption">Fig. 1 &nbsp;·&nbsp; "文" と "間" の対比 — 同じ言葉でも、密度と余白で意味の振る舞いが変わる</div>
+  </div>
+</section>
+
+<section id="architecture">
+  <h2><span class="num">02</span>3 Stage Architecture</h2>
+  <p class="sub">定める · 広める · 感化する</p>
+
+  <p>間メディアは三段階で構成される。Stage A で「間」を定義化し、Stage B で社会に流通させ、Stage C で個人の暮らしの中に装置として埋め込む。動詞の階段が、受け手の状態変化に対応する。</p>
+
+  <div class="stages">
+    <div class="stage-card">
+      <div class="label">STAGE A</div>
+      <div class="verb">定める</div>
+      <div class="unit">間 <em>Lab</em></div>
+      <div class="role">間の定義化</div>
+      <div class="subs"><a href="../dictionary/" style="color:var(--ink-soft);text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:4px;">dictionary →</a><br/>research<br/><a href="../reference-room/" style="color:var(--ink-soft);text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:4px;">reference →</a></div>
+    </div>
+    <div class="stage-card">
+      <div class="label">STAGE B</div>
+      <div class="verb">広める</div>
+      <div class="unit">間 <em>ch</em></div>
+      <div class="role">間の流通化</div>
+      <div class="subs">channel A<br/>channel B<br/>channel C</div>
+    </div>
+    <div class="stage-card">
+      <div class="label">STAGE C</div>
+      <div class="verb">感化する</div>
+      <div class="unit">間 <em>do</em></div>
+      <div class="role">間の個人化</div>
+      <div class="subs">device A<br/>device B<br/>device C</div>
+    </div>
+  </div>
+
+  <div class="viz">
+    <div class="mermaid">
+flowchart LR
+  classDef stage fill:#fbf9f3,stroke:#1c1a17,stroke-width:1px,color:#1c1a17,font-family:Shippori Mincho
+  classDef sub fill:transparent,stroke:#d8d1c2,stroke-width:1px,color:#4a4540,font-family:Shippori Mincho
+  classDef center fill:#1c1a17,stroke:#1c1a17,color:#f7f4ed,font-family:Shippori Mincho
+
+  MA(("間メディア<br/>暮らしへのインストール")):::center
+
+  A[間 Lab<br/>──<br/>定める]:::stage
+  B[間 ch<br/>──<br/>広める]:::stage
+  C[間 do<br/>──<br/>感化する]:::stage
+
+  A1[dictionary]:::sub
+  A2[research]:::sub
+  A3[reference]:::sub
+
+  B1[channel A]:::sub
+  B2[channel B]:::sub
+  B3[channel C]:::sub
+
+  C1[device A]:::sub
+  C2[device B]:::sub
+  C3[device C]:::sub
+
+  MA --> A --> B --> C
+  A --- A1
+  A --- A2
+  A --- A3
+  B --- B1
+  B --- B2
+  B --- B3
+  C --- C1
+  C --- C2
+  C --- C3
+    </div>
+    <div class="caption">Fig. 2 &nbsp;·&nbsp; A → B → C 間メディア全体構造図</div>
+  </div>
+
+  <blockquote class="statement">
+    定める → 広める → 感化する<br/>
+    <span style="color:var(--ink-mute);font-size:0.9em;font-family:'EB Garamond';font-style:italic;">define → distribute → install</span>
+  </blockquote>
+</section>
+
+<section id="lab">
+  <h2><span class="num">03</span>Stage A — 間 Lab</h2>
+  <p class="sub">間の定義化を担う三本柱</p>
+
+  <p>Lab は単独の辞書ではなく、<strong>定義のための研究装置</strong>である。仮説（dictionary）、能動的実証（research）、時代/世間の裏付け（reference）の三本柱がここで揃って初めて「定義感」が成立する。</p>
+
+  <table>
+    <thead><tr><th>柱</th><th>役割</th><th>具体</th></tr></thead>
+    <tbody>
+      <tr><td>dictionary</td><td>仮説：間とは◯◯である</td><td>単語・オノマトペ・ヴィジュアルの三層辞書</td></tr>
+      <tr><td>research</td><td>能動的実証</td><td>ユーザーへの問い、アンケート、立証プロセス</td></tr>
+      <tr><td>reference</td><td>裏付けとなる資料庫</td><td>間マニアであることを示す文献・事例の集積</td></tr>
+    </tbody>
+  </table>
+
+  <blockquote>取扱説明書がないのに道具を使っているようなものだ。第一選択肢になると言う以上、しっかり答えを持っていなければならない。</blockquote>
+</section>
+
+<section id="dictionary">
+  <h2><span class="num">04</span>Dictionary の構造</h2>
+  <p class="sub">単語 ⇄ オノマトペ ⇄ ヴィジュアル — 感覚と論理を往復する空間</p>
+
+  <p>5/4 のノートで具体化された Dictionary の内部構造。各語は<strong>連想ゲームのように境界線で重なり合い、ニュアンスが近いものは空間的にも近くに集まっている</strong>。スペースステーションのように、すべては「間」という重力源に引き寄せられている。</p>
+
+  <h3>触ってみる</h3>
+
+  <div class="proto">
+    <div class="frame-head">
+      <span><span class="dot"></span>dictionary · interactive prototype</span>
+      <a href="../dictionary/" target="_blank">フルスクリーンで開く ↗</a>
+    </div>
+    <iframe src="../dictionary/" loading="lazy" title="Dictionary Prototype"></iframe>
+    <div class="frame-note">
+      中心「間」を取り囲む 8 クラスタ × 3 層 = 24 ノード。任意のノードをクリックすると、同じクラスタの他層と関連クラスタが連鎖して立ち上がる。下部スライダーで <em>感覚 ⇄ 論理</em> の強調を切り替えられる。
+    </div>
+  </div>
+
+  <h3>構造の図解</h3>
+
+  <div class="viz">
+    <svg class="figure" viewBox="0 0 800 480" xmlns="http://www.w3.org/2000/svg">
+      <!-- outer floating reference cards -->
+      <g fill="none" stroke="#d8d1c2" stroke-width="1">
+        <rect x="40" y="40" width="40" height="28"/>
+        <rect x="700" y="30" width="38" height="30"/>
+        <rect x="60" y="380" width="42" height="30"/>
+        <rect x="720" y="400" width="38" height="28"/>
+        <rect x="380" y="20" width="44" height="28"/>
+        <rect x="20" y="220" width="36" height="30"/>
+        <rect x="740" y="220" width="36" height="28"/>
+        <rect x="400" y="440" width="40" height="28"/>
+      </g>
+      <text x="50" y="25" font-size="10" fill="#8a8278" font-style="italic" font-family="EB Garamond">reference</text>
+
+      <!-- gravity rings -->
+      <g fill="none" stroke="#d8d1c2" stroke-dasharray="2 4">
+        <ellipse cx="400" cy="240" rx="280" ry="160"/>
+        <ellipse cx="400" cy="240" rx="180" ry="105"/>
+        <ellipse cx="400" cy="240" rx="90" ry="55"/>
+      </g>
+
+      <!-- center 間 -->
+      <g transform="translate(400,240)">
+        <circle r="42" fill="#1c1a17"/>
+        <text text-anchor="middle" y="8" font-size="32" fill="#f7f4ed">間</text>
+      </g>
+
+      <!-- inner: 単語 layer (close, logical) -->
+      <g font-size="14" fill="#1c1a17">
+        <text x="305" y="200" text-anchor="middle">隙間</text>
+        <text x="495" y="200" text-anchor="middle">停止</text>
+        <text x="305" y="295" text-anchor="middle">中動態</text>
+        <text x="495" y="295" text-anchor="middle">平場</text>
+        <text x="400" y="180" text-anchor="middle">取捨</text>
+        <text x="400" y="315" text-anchor="middle">心離</text>
+      </g>
+
+      <!-- middle: オノマトペ layer -->
+      <g font-size="13" fill="#8b1a1a" font-style="italic">
+        <text x="240" y="160" text-anchor="middle">スーン</text>
+        <text x="560" y="160" text-anchor="middle">ふっ</text>
+        <text x="240" y="330" text-anchor="middle">ゆら</text>
+        <text x="560" y="330" text-anchor="middle">ぽつ</text>
+        <text x="200" y="240" text-anchor="middle">しん</text>
+        <text x="600" y="240" text-anchor="middle">すっ</text>
+      </g>
+
+      <!-- outer: ヴィジュアル layer (irregular shapes) -->
+      <g fill="#b7826a" opacity="0.5">
+        <ellipse cx="140" cy="120" rx="22" ry="14" transform="rotate(15 140 120)"/>
+        <ellipse cx="660" cy="120" rx="20" ry="16" transform="rotate(-20 660 120)"/>
+        <ellipse cx="120" cy="320" rx="24" ry="15" transform="rotate(-10 120 320)"/>
+        <ellipse cx="680" cy="340" rx="20" ry="14" transform="rotate(25 680 340)"/>
+        <ellipse cx="400" cy="80" rx="26" ry="14"/>
+        <ellipse cx="400" cy="400" rx="22" ry="14"/>
+        <ellipse cx="100" cy="240" rx="18" ry="22"/>
+        <ellipse cx="700" cy="240" rx="20" ry="20"/>
+      </g>
+
+      <!-- legend -->
+      <g font-family="EB Garamond" font-style="italic" font-size="11" fill="#8a8278">
+        <text x="20" y="465">visual</text>
+        <line x1="60" y1="461" x2="100" y2="461" stroke="#b7826a" opacity="0.5"/>
+        <text x="115" y="465">onomatopoeia</text>
+        <line x1="200" y1="461" x2="240" y2="461" stroke="#8b1a1a"/>
+        <text x="255" y="465">word</text>
+        <line x1="290" y1="461" x2="320" y2="461" stroke="#1c1a17"/>
+        <text x="780" y="465" text-anchor="end">感覚 ← → 論理</text>
+      </g>
+    </svg>
+    <div class="caption">Fig. 3 &nbsp;·&nbsp; Dictionary の重力空間 — 中心「間」へ語が引き寄せられ、外周には参考資料が浮遊する</div>
+  </div>
+
+  <h3>三層構造とインタラクション</h3>
+
+  <table>
+    <thead><tr><th>層</th><th>性質</th><th>例</th></tr></thead>
+    <tbody>
+      <tr><td>① 単語</td><td>論理側。確定した意味を持つ言葉</td><td>隙間 / 中動態 / 平場 / 取捨</td></tr>
+      <tr><td>② オノマトペ</td><td>中間領域。音と身体性のフック</td><td>スーン / ふっ / ゆら / しん</td></tr>
+      <tr><td>③ ヴィジュアル</td><td>感覚側。形と空気の塊</td><td>有機的なシェイプ・写真</td></tr>
+    </tbody>
+  </table>
+
+  <p>感覚で選んだヴィジュアルから、紐づいたオノマトペ、その先の単語が**連鎖して引き寄せられて**くる。逆向きに、単語から触れることもできる。</p>
+
+  <div class="tld" id="tld">
+    <div class="tld-bg-spectrum"></div>
+    <div class="tld-cols">
+      <div class="tld-col" data-layer="visual">
+        <div class="tld-label"><span class="dir">←</span> 感覚 · visual</div>
+        <div class="tld-items" id="tld-visual"></div>
+      </div>
+      <div class="tld-col" data-layer="onomatopoeia">
+        <div class="tld-label">中間 · onomatopoeia</div>
+        <div class="tld-items" id="tld-ono"></div>
+      </div>
+      <div class="tld-col" data-layer="word">
+        <div class="tld-label">論理 · word <span class="dir">→</span></div>
+        <div class="tld-items" id="tld-word"></div>
+      </div>
+    </div>
+    <svg class="tld-svg" id="tld-svg" preserveAspectRatio="none"></svg>
+    <div class="tld-footer">
+      <div class="tld-status" id="tld-status">どの列でも、気になるものを選んでください</div>
+      <button class="tld-reset" id="tld-reset">リセット</button>
+    </div>
+  </div>
+  <div class="caption" style="text-align:center;color:var(--ink-mute);font-family:'EB Garamond',serif;font-style:italic;font-size:0.9rem;margin-top:1rem;letter-spacing:0.04em;">Fig. 4 · 三層の連鎖 — 一つ選ぶと、紐づいた他層が連れてくる</div>
+
+  <blockquote>気になったヴィジュアルを何個か引っ張り出すと、紐づいたオノマトペがついてくる。さらに紐づいた言葉も引いついてくる。<strong>自分の感覚で選んだものが、具体的な単語として立ち上がる。</strong></blockquote>
+</section>
+
+<section id="reference-room">
+  <h2><span class="num">05</span>Reference Room</h2>
+  <p class="sub">「間」マニアであることの裏付けとなる、ディグれる資料庫</p>
+
+  <p>Dictionary が仮説なら、Reference Room はその裏付け。哲学・芸能・建築・デザイン・文学から、「間」が現れてきた場所をひたすら集めた資料庫。<strong>レコード屋のようにディグれる</strong>体験館として設計される。</p>
+
+  <p>Dictionary の各キーワードと連動し、資料側からも辞書へ戻れる。読者は両者の往復のなかで「間」の輪郭を獲得していく。</p>
+
+  <h3>触ってみる</h3>
+
+  <div class="proto">
+    <div class="frame-head">
+      <span><span class="dot"></span>reference room · interactive prototype</span>
+      <a href="../reference-room/" target="_blank">フルスクリーンで開く ↗</a>
+    </div>
+    <iframe src="../reference-room/" loading="lazy" title="Reference Room Prototype"></iframe>
+    <div class="frame-note">
+      14 件の資料カード。古代〜現代の文献・芸能・デザインから、「間」を語る資料を集めた。上部のキーワードチップで絞り込み可能。<em>grid</em>／<em>dig</em> モード切替で、整列⇄レコード屋的散乱を切り替えられる。
+    </div>
+  </div>
+
+  <h3>設計の三原則</h3>
+
+  <table>
+    <thead><tr><th>原則</th><th>具体</th></tr></thead>
+    <tbody>
+      <tr><td>dictionary との連動</td><td>辞書の単語をカテゴリーとして資料が紐づく。両者は双方向に行き来できる</td></tr>
+      <tr><td>ディグ体験</td><td>検索する場所ではなく潜って迷う場所。レコード屋のように、関連性の薄い資料が偶然出会う余地を残す</td></tr>
+      <tr><td>自己拡張</td><td>新しい資料が入ると AI が既存資料との関連を自動で結ぶ。勝手に成長拡大していく資料庫</td></tr>
+    </tbody>
+  </table>
+
+  <blockquote>「間」界隈の資料、参考文献となる何かをひたすら集めて置く部屋。我々が「間」マニアであることの裏付けとなる場所。</blockquote>
+</section>
+
+<section id="ch">
+  <h2><span class="num">06</span>Stage B — 間 ch</h2>
+  <p class="sub">複数チャネルでの流通装置</p>
+
+  <p>Lab で定義された「間」を、翻訳を兼ねた表現に置き換えて社会へ問う段階。単一メディアではなく、<strong>マルチチャネル戦略</strong>として A/B/C 並列で設計される。記事、トーク、コンテンツ企画など、それぞれの語り口で同じ核を伝える。</p>
+
+  <blockquote>我々が考える「間」の定義のたしかさを、こちら（広める）で広げていく。</blockquote>
+
+  <p>Stage B の成果は、Stage A の定義に正確に紐づいていなければならない。<em>「定義したことが、ここら辺のものとちゃんとリンクしているかが大事」</em>。</p>
+</section>
+
+<section id="do">
+  <h2><span class="num">07</span>Stage C — 間 do</h2>
+  <p class="sub">個人の暮らしへインストールする装置</p>
+
+  <p>「広めた」結果、共鳴した個人が「自分もやってみたい」となった時、最初に手渡す<strong>装置（device）</strong>群。間を作るための、あるいは間を起動させるための、具体的な道具・プロダクトたち。</p>
+
+  <table>
+    <thead><tr><th>装置</th><th>機能</th></tr></thead>
+    <tbody>
+      <tr><td>香り</td><td>横展開可能なビジネスフレームの中核プロダクト</td></tr>
+      <tr><td>去年の景色が今年見れるカレンダー</td><td>立ち止まるきっかけ／現象を閉じ込めるカレンダー</td></tr>
+      <tr><td>ジャーナル（日記）</td><td>デジタルで間を記録する装置</td></tr>
+      <tr><td>卑弥呼</td><td>間を作るための道具</td></tr>
+      <tr><td>止まった時計／ストップウォッチ</td><td>時間に対するアプローチを変える小道具</td></tr>
+    </tbody>
+  </table>
+
+  <blockquote>広めて「間っていいな」となった時に、その先で必要になる道具を作っていく。卑弥呼も、間を作るための装置のひとつ。</blockquote>
+</section>
+
+<section id="keywords">
+  <h2><span class="num">08</span>Keywords</h2>
+  <p class="sub">「間とは ◯◯ である」 を構成する語彙の地金</p>
+
+  <p>5/1 のノートで抽出された、間の輪郭を作る一群。これらが Dictionary の見出し語の核となる。</p>
+
+  <div class="keyword-cloud">
+    <span>停止</span>
+    <span>中動態</span>
+    <span>平場</span>
+    <span>隙間</span>
+    <span>取捨</span>
+    <span>解</span>
+    <span>心離</span>
+    <span>起因</span>
+    <span>感覚</span>
+    <span>空</span>
+    <span>立ち止まり</span>
+    <span>夢うつつ</span>
+    <span>捨てる</span>
+    <span>長持ち</span>
+    <span>リズム</span>
+  </div>
+
+  <blockquote>「間の解釈を飛躍・派遣・掌握する KEYWORD を定める。」 — 5/1 ノート</blockquote>
+</section>
+
+<section id="timeline">
+  <h2><span class="num">09</span>構想の進化</h2>
+  <p class="sub">8日間で抽象度が一段ずつ上がっていく</p>
+
+  <div class="timeline">
+    <div class="tl-entry">
+      <div class="tl-date">2026 · 04 · 30</div>
+      <div class="tl-title">dictionary と reference room の構想</div>
+      <div class="tl-body">「間」を論理的・感覚的に定義づける dictionary、それを裏付ける reference room（マニア部屋）を併設。レコード屋のようにディグれる体験館として構想。"文" と "間" の対比、感覚⇄論理の両方向往復の原理を確立。</div>
+    </div>
+    <div class="tl-entry">
+      <div class="tl-date">2026 · 05 · 01</div>
+      <div class="tl-title">キーワードの抽出</div>
+      <div class="tl-body">「間とは ◯◯ である」の定式化。停止／中動態／平場／隙間／取捨／解／心離／起因／感覚／空 — 辞書の見出し語の核を確定。</div>
+    </div>
+    <div class="tl-entry">
+      <div class="tl-date">2026 · 05 · 04</div>
+      <div class="tl-title">UI / 体験設計</div>
+      <div class="tl-body">単語・オノマトペ・ヴィジュアルの三層構造を明示。重力で引き寄せ合う空間設計、クリックすると関連語が連鎖して付いてくる、感覚 → 論理への自動運搬装置としての Dictionary が固まる。</div>
+    </div>
+    <div class="tl-entry">
+      <div class="tl-date">2026 · 05 · 07</div>
+      <div class="tl-title">設計会議 — Lab の追加</div>
+      <div class="tl-body">設計会議で dictionary / reference に加えて、能動的実証を担う lab を追加。「定める」と「広める」の2機能でメディア全体を括る初稿。</div>
+    </div>
+    <div class="tl-entry">
+      <div class="tl-date">2026 · 05 · 08</div>
+      <div class="tl-title">全体構想の確定 — 3 Stage Architecture</div>
+      <div class="tl-body">間 Lab / 間 ch / 間 do の3 stage モデル確定。「感化する」を第3軸として独立。do は device の頭文字でありつつ「間する」の動詞性を帯びる。メディアの大義文（「間を文化として暮らしにインストール」）が確定。</div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  studio saitama × manaka &nbsp;·&nbsp; ma | media architecture notes &nbsp;·&nbsp; updated 2026.05.11
+</footer>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      fontFamily: 'Shippori Mincho, serif',
+      primaryColor: '#fbf9f3',
+      primaryTextColor: '#1c1a17',
+      primaryBorderColor: '#1c1a17',
+      lineColor: '#8a8278',
+      tertiaryColor: '#f7f4ed'
+    }
+  });
+
+  // ===================================================
+  //  Three-Layer Interactive Demo
+  // ===================================================
+  (function() {
+    // Data: 6 clusters, each with visual / ono / word
+    const clusters = [
+      { id: 'c1', vis: '雲の合間', ono: 'すっ', wrd: '隙間' },
+      { id: 'c2', vis: '茶室の影', ono: 'しん', wrd: '沈黙' },
+      { id: 'c3', vis: '雪原の足跡', ono: 'ぽつ', wrd: '待つ' },
+      { id: 'c4', vis: '余白の書', ono: 'ふっ', wrd: '余白' },
+      { id: 'c5', vis: '水面の波紋', ono: 'ゆら', wrd: '呼吸' },
+      { id: 'c6', vis: '朝の畳', ono: 'とん', wrd: 'リズム' },
+    ];
+
+    // Build cross-relations for richer interaction:
+    // some visuals also weakly link to other onomatopoeias of nearby nuance
+    const crossLinks = [
+      // [visualClusterIdx, onomatopoeiaClusterIdx]
+      [0, 3], // 雲の合間 ↔ ふっ
+      [1, 3], // 茶室の影 ↔ ふっ
+      [2, 4], // 雪原の足跡 ↔ ゆら
+      [4, 5], // 水面の波紋 ↔ とん
+      [5, 0], // 朝の畳 ↔ すっ
+    ];
+    // ono-word cross
+    const crossOnoWord = [
+      [3, 1], // ふっ ↔ 沈黙
+      [4, 2], // ゆら ↔ 待つ
+      [0, 3], // すっ ↔ 余白
+    ];
+
+    const visualCol = document.getElementById('tld-visual');
+    const onoCol = document.getElementById('tld-ono');
+    const wordCol = document.getElementById('tld-word');
+    const svg = document.getElementById('tld-svg');
+    const status = document.getElementById('tld-status');
+    const reset = document.getElementById('tld-reset');
+    const container = document.getElementById('tld');
+
+    if (!container) return;
+
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+
+    // Build nodes
+    const nodes = []; // { id, layer, label, clusterIdx, el }
+    clusters.forEach((c, i) => {
+      // visual
+      const v = document.createElement('div');
+      v.className = 'tld-item visual';
+      v.innerHTML = `<div class="blob"></div><div class="label">${c.vis}</div>`;
+      v.dataset.id = `v${i}`;
+      visualCol.appendChild(v);
+      nodes.push({ id: `v${i}`, layer: 'visual', label: c.vis, clusterIdx: i, el: v });
+
+      // ono
+      const o = document.createElement('div');
+      o.className = 'tld-item ono';
+      o.textContent = c.ono;
+      o.dataset.id = `o${i}`;
+      onoCol.appendChild(o);
+      nodes.push({ id: `o${i}`, layer: 'ono', label: c.ono, clusterIdx: i, el: o });
+
+      // word
+      const w = document.createElement('div');
+      w.className = 'tld-item word';
+      w.textContent = c.wrd;
+      w.dataset.id = `w${i}`;
+      wordCol.appendChild(w);
+      nodes.push({ id: `w${i}`, layer: 'word', label: c.wrd, clusterIdx: i, el: w });
+    });
+
+    // Build connection list: each connection { from: nodeId, to: nodeId, strong: bool }
+    const connections = [];
+    clusters.forEach((c, i) => {
+      connections.push({ from: `v${i}`, to: `o${i}`, strong: true });
+      connections.push({ from: `o${i}`, to: `w${i}`, strong: true });
+    });
+    crossLinks.forEach(([vi, oi]) => {
+      connections.push({ from: `v${vi}`, to: `o${oi}`, strong: false });
+    });
+    crossOnoWord.forEach(([oi, wi]) => {
+      connections.push({ from: `o${oi}`, to: `w${wi}`, strong: false });
+    });
+
+    // Adjacency map: node -> [connected node ids]
+    const adj = {};
+    connections.forEach(c => {
+      (adj[c.from] = adj[c.from] || []).push({ id: c.to, strong: c.strong });
+      (adj[c.to] = adj[c.to] || []).push({ id: c.from, strong: c.strong });
+    });
+
+    // Create SVG paths for each connection
+    const pathEls = {};
+    connections.forEach((c, i) => {
+      const p = document.createElementNS(SVG_NS, 'path');
+      if (c.strong) p.dataset.strong = '1';
+      svg.appendChild(p);
+      const key = `${c.from}-${c.to}`;
+      pathEls[key] = p;
+    });
+
+    // Selection state
+    const selected = new Set();
+
+    function nodeCenter(nodeId) {
+      const n = nodes.find(x => x.id === nodeId);
+      if (!n) return { x: 0, y: 0 };
+      const rect = n.el.getBoundingClientRect();
+      const cont = container.getBoundingClientRect();
+      return {
+        x: rect.left + rect.width / 2 - cont.left,
+        y: rect.top + rect.height / 2 - cont.top,
+      };
+    }
+
+    function updatePaths() {
+      const cont = container.getBoundingClientRect();
+      svg.setAttribute('viewBox', `0 0 ${cont.width} ${cont.height}`);
+      connections.forEach(c => {
+        const a = nodeCenter(c.from);
+        const b = nodeCenter(c.to);
+        const dx = b.x - a.x;
+        const cp1x = a.x + dx * 0.5;
+        const cp2x = a.x + dx * 0.5;
+        const d = `M ${a.x} ${a.y} C ${cp1x} ${a.y}, ${cp2x} ${b.y}, ${b.x} ${b.y}`;
+        pathEls[`${c.from}-${c.to}`].setAttribute('d', d);
+      });
+    }
+
+    function computeActive() {
+      // Returns sets: selectedIds, connectedIds, activePathKeys
+      const sel = new Set(selected);
+      const conn = new Set();
+      const paths = new Set();
+
+      sel.forEach(id => {
+        (adj[id] || []).forEach(n => {
+          if (!sel.has(n.id)) conn.add(n.id);
+          // path key: try both orders
+          const k1 = `${id}-${n.id}`;
+          const k2 = `${n.id}-${id}`;
+          if (pathEls[k1]) paths.add(k1);
+          else if (pathEls[k2]) paths.add(k2);
+        });
+      });
+
+      // Second wave: connect connected → their connections (one extra hop)
+      conn.forEach(id => {
+        (adj[id] || []).forEach(n => {
+          if (sel.has(n.id)) return; // already covered
+          if (!conn.has(n.id)) return; // only show inter-connected paths
+          const k1 = `${id}-${n.id}`;
+          const k2 = `${n.id}-${id}`;
+          if (pathEls[k1]) paths.add(k1);
+          else if (pathEls[k2]) paths.add(k2);
+        });
+      });
+
+      return { sel, conn, paths };
+    }
+
+    function render() {
+      const { sel, conn, paths } = computeActive();
+
+      nodes.forEach(n => {
+        n.el.classList.toggle('selected', sel.has(n.id));
+        n.el.classList.toggle('connected', !sel.has(n.id) && conn.has(n.id));
+      });
+
+      // Hide all paths, then show active ones
+      Object.entries(pathEls).forEach(([key, el]) => {
+        const isShown = paths.has(key);
+        el.classList.toggle('show', isShown);
+        // Strong if both endpoints are selected, or it's a strong link with one selected
+        const [from, to] = key.split('-');
+        const strong = el.dataset.strong === '1' && (sel.has(from) || sel.has(to));
+        el.classList.toggle('strong', isShown && strong);
+      });
+
+      // Status text
+      if (sel.size === 0) {
+        status.innerHTML = 'どの列でも、気になるものを選んでください';
+      } else {
+        const layerOrder = { visual: 0, ono: 1, word: 2 };
+        const labels = [...sel].map(id => nodes.find(n => n.id === id)).sort((a, b) => layerOrder[a.layer] - layerOrder[b.layer]);
+        const layersHit = new Set(labels.map(l => l.layer));
+        const phrase = layersHit.size === 3
+          ? '三層すべてに広がった'
+          : layersHit.has('visual') && layersHit.has('word')
+          ? '感覚と論理が結ばれた'
+          : layersHit.has('visual')
+          ? '感覚側から'
+          : layersHit.has('word')
+          ? '論理側から'
+          : '中間から';
+        status.innerHTML = `<strong>${labels.map(l => l.label).join(' · ')}</strong> &nbsp;—&nbsp; ${phrase} ${conn.size} 個が連れてくる`;
+      }
+    }
+
+    // Event: click any node toggles selection
+    nodes.forEach(n => {
+      n.el.addEventListener('click', () => {
+        if (selected.has(n.id)) selected.delete(n.id);
+        else selected.add(n.id);
+        render();
+      });
+    });
+
+    reset.addEventListener('click', () => {
+      selected.clear();
+      render();
+    });
+
+    // Initial render
+    function init() {
+      updatePaths();
+      render();
+    }
+
+    // Run after fonts/layout settle
+    if (document.readyState === 'complete') {
+      setTimeout(init, 100);
+    } else {
+      window.addEventListener('load', () => setTimeout(init, 100));
+    }
+
+    // Reposition on resize
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(updatePaths, 80);
+    });
+
+    // Also recompute on scroll into view (some browsers need it)
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) updatePaths(); });
+    }, { threshold: 0.1 });
+    observer.observe(container);
+  })();
+</script>
+
+</body>
+</html>

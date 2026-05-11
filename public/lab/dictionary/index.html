@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>間 Dictionary — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f4ed;
+    --paper: #fbf9f3;
+    --ink: #1c1a17;
+    --ink-soft: #4a4540;
+    --ink-mute: #8a8278;
+    --rule: #d8d1c2;
+    --accent: #8b1a1a;
+    --visual: #b7826a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: "Shippori Mincho", serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .stage {
+    position: fixed; inset: 0;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+  }
+
+  .canvas-wrap {
+    position: relative;
+    background:
+      radial-gradient(ellipse at center, rgba(28,26,23,0.04) 0%, transparent 60%),
+      var(--bg);
+    overflow: hidden;
+  }
+  svg.space {
+    width: 100%; height: 100%;
+    display: block;
+    cursor: grab;
+  }
+  svg.space.dragging { cursor: grabbing; }
+
+  /* SVG element styles */
+  .ring { fill: none; stroke: var(--rule); stroke-dasharray: 2 6; opacity: 0.5; }
+  .center text { font-size: 56px; fill: #f7f4ed; }
+  .center circle { fill: var(--ink); transition: r 0.6s ease; }
+
+  .node { cursor: pointer; transition: opacity 0.4s ease; }
+  .node text { user-select: none; pointer-events: none; }
+
+  .node.word text {
+    font-size: 16px;
+    fill: var(--ink);
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+  .node.word rect {
+    fill: var(--paper);
+    stroke: var(--ink);
+    stroke-width: 1;
+    transition: all 0.4s ease;
+  }
+
+  .node.onomatopoeia text {
+    font-size: 16px;
+    fill: var(--accent);
+    font-style: italic;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+  .node.onomatopoeia circle {
+    fill: var(--paper);
+    stroke: var(--accent);
+    stroke-width: 1;
+    transition: all 0.4s ease;
+  }
+
+  .node.visual text {
+    font-size: 12px;
+    fill: var(--ink-soft);
+    text-anchor: middle;
+    dominant-baseline: central;
+    opacity: 0.85;
+  }
+  .node.visual .blob {
+    fill: var(--visual);
+    opacity: 0.45;
+    transition: all 0.5s ease;
+  }
+
+  .node:hover .blob,
+  .node:hover circle,
+  .node:hover rect { filter: brightness(0.95); }
+  .node:hover text { fill: var(--accent); }
+
+  .node.dim { opacity: 0.15; }
+  .node.active text { font-weight: 600; fill: var(--ink); }
+  .node.active rect { fill: var(--ink); }
+  .node.active.word text { fill: var(--bg); }
+  .node.active circle { fill: var(--accent); }
+  .node.active.onomatopoeia text { fill: var(--bg); }
+  .node.active .blob { opacity: 0.85; }
+
+  .link {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  .link.show { opacity: 0.35; }
+
+  /* Side panel */
+  .panel {
+    background: var(--paper);
+    padding: 4rem 2.5rem 2rem;
+    overflow-y: auto;
+    border-left: 1px solid var(--rule);
+    position: relative;
+  }
+  .panel .eyebrow {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--ink-mute);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.8rem;
+  }
+  .panel h1 {
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1.4;
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.04em;
+  }
+  .panel .layer-tag {
+    display: inline-block;
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--ink-mute);
+    padding: 0.15em 0.6em;
+    border: 1px solid var(--rule);
+    border-radius: 100px;
+    margin-bottom: 2rem;
+    letter-spacing: 0.06em;
+  }
+  .panel .def {
+    font-size: 0.95rem;
+    line-height: 2;
+    color: var(--ink-soft);
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .panel .section-label {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    color: var(--ink-mute);
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.8rem;
+  }
+  .panel .related {
+    margin-bottom: 2rem;
+  }
+  .panel .related-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    border-bottom: 1px dashed var(--rule);
+    transition: padding-left 0.2s ease;
+  }
+  .panel .related-item:hover {
+    padding-left: 0.4rem;
+    color: var(--accent);
+  }
+  .panel .related-item .label {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    color: var(--ink-mute);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    min-width: 4rem;
+  }
+  .panel .related-item .name {
+    font-size: 1rem;
+  }
+  .panel .ref-link {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 0.7rem 1.2rem;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    transition: all 0.2s ease;
+  }
+  .panel .ref-link:hover {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .panel .ref-link::after {
+    content: " →";
+    font-family: "EB Garamond", serif;
+  }
+
+  /* Default panel state */
+  .panel-default {
+    padding-top: 5rem;
+  }
+  .panel-default .quote {
+    font-size: 1.1rem;
+    line-height: 2.2;
+    color: var(--ink-soft);
+    margin: 1.5rem 0 2rem;
+  }
+  .panel-default .legend {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--rule);
+  }
+  .panel-default .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  .panel-default .legend-item .swatch {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .panel-default .legend-item .desc {
+    font-size: 0.8rem;
+    color: var(--ink-mute);
+    line-height: 1.6;
+  }
+  .panel-default .legend-item .desc strong {
+    display: block;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 0.1rem;
+    font-size: 0.95rem;
+  }
+
+  /* Header */
+  .top-bar {
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 10;
+    padding: 1.8rem 2.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 2rem;
+  }
+  .top-bar .title {
+    font-size: 1.1rem;
+    letter-spacing: 0.08em;
+  }
+  .top-bar .title .ma {
+    border: 1px solid var(--ink);
+    padding: 0.05em 0.4em;
+    margin-right: 0.3em;
+  }
+  .top-bar .crumb {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    color: var(--ink-mute);
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+  }
+
+  /* Spectrum slider */
+  .spectrum {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--paper);
+    padding: 0.9rem 1.8rem;
+    border-radius: 100px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid var(--rule);
+    z-index: 10;
+  }
+  .spectrum label {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--ink-mute);
+    letter-spacing: 0.06em;
+  }
+  .spectrum input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    width: 200px;
+    height: 18px;
+  }
+  .spectrum input[type=range]::-webkit-slider-runnable-track {
+    height: 1px;
+    background: var(--ink-mute);
+  }
+  .spectrum input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--ink);
+    border-radius: 50%;
+    margin-top: -7px;
+    cursor: pointer;
+  }
+  .spectrum input[type=range]::-moz-range-track {
+    height: 1px;
+    background: var(--ink-mute);
+  }
+  .spectrum input[type=range]::-moz-range-thumb {
+    width: 14px; height: 14px; background: var(--ink); border-radius: 50%; border: none; cursor: pointer;
+  }
+
+  /* Footer crumbs */
+  .footer-links {
+    position: fixed;
+    bottom: 1.8rem;
+    right: 2rem;
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--ink-mute);
+    letter-spacing: 0.05em;
+  }
+  .footer-links a {
+    color: var(--ink-mute);
+    text-decoration: none;
+    margin-left: 1.2rem;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--accent); }
+
+  @media (max-width: 900px) {
+    .stage { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+    .panel { max-height: 50vh; border-left: none; border-top: 1px solid var(--rule); padding: 2rem 1.5rem; }
+    .top-bar { padding: 1rem 1.5rem; }
+    .top-bar .crumb { display: none; }
+    .spectrum { bottom: auto; top: 4rem; }
+    .footer-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="title"><span class="ma">間</span>Dictionary</div>
+  <div class="crumb">prototype · 三層辞書空間</div>
+</div>
+
+<div class="stage">
+  <div class="canvas-wrap">
+    <svg class="space" id="space" viewBox="-500 -500 1000 1000" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <aside class="panel" id="panel">
+    <div class="panel-default">
+      <div class="eyebrow">prototype · 2026.05</div>
+      <h1>三層を歩く</h1>
+      <p class="quote">
+        単語・オノマトペ・ヴィジュアルが、<br/>
+        重力で「間」へ引き寄せられている。<br/>
+        ひとつ触れると、紐づいた他層が連れてくる。
+      </p>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="swatch">
+            <svg width="34" height="20" viewBox="0 0 34 20">
+              <rect x="1" y="1" width="32" height="18" fill="#fbf9f3" stroke="#1c1a17"/>
+              <text x="17" y="14" text-anchor="middle" font-size="11" fill="#1c1a17" font-family="Shippori Mincho">隙間</text>
+            </svg>
+          </div>
+          <div class="desc"><strong>単語</strong>論理側。確定した意味</div>
+        </div>
+        <div class="legend-item">
+          <div class="swatch">
+            <svg width="34" height="34" viewBox="0 0 34 34">
+              <circle cx="17" cy="17" r="14" fill="#fbf9f3" stroke="#8b1a1a"/>
+              <text x="17" y="20" text-anchor="middle" font-size="11" fill="#8b1a1a" font-family="Shippori Mincho" font-style="italic">しん</text>
+            </svg>
+          </div>
+          <div class="desc"><strong>オノマトペ</strong>中間。音と身体のフック</div>
+        </div>
+        <div class="legend-item">
+          <div class="swatch">
+            <svg width="34" height="22" viewBox="0 0 34 22">
+              <ellipse cx="17" cy="11" rx="14" ry="9" fill="#b7826a" opacity="0.5" transform="rotate(8 17 11)"/>
+            </svg>
+          </div>
+          <div class="desc"><strong>ヴィジュアル</strong>感覚側。形と空気</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="spectrum">
+  <label>感覚</label>
+  <input type="range" id="spectrum" min="0" max="100" value="50">
+  <label>論理</label>
+</div>
+
+<div class="footer-links">
+  <a href="../architecture/">← 全体構想へ</a>
+  <a href="../reference-room/">資料室へ →</a>
+</div>
+
+<script>
+// =========================================================
+//  間 Dictionary — Data
+// =========================================================
+//  8 clusters × 3 layers (word / onomatopoeia / visual)
+//  Each cluster shares a "nuance" — sits at the same angular
+//  region around 間, with different radii per layer.
+// =========================================================
+
+const clusters = [
+  {
+    id: 'stillness',
+    angle: -90,
+    nuance: '静止',
+    word: { id: 'w-chinmoku', label: '沈黙', def: '音や言葉が止んでいる状態。何もない、ではなく、言葉の手前にあるもの。語る前の静けさが、語られたものに重さを与える。' },
+    ono:  { id: 'o-shin',     label: 'しん', def: '空気の輪郭が見えるほどの、底のある静けさ。雪が降り積もる夜の音。' },
+    vis:  { id: 'v-chashitsu', label: '茶室の影', def: '陽の落ちた茶室の隅、畳の縁に溜まる薄い影。何かが起きる直前の、空気の濃度。' },
+  },
+  {
+    id: 'interval',
+    angle: -45,
+    nuance: '隙間',
+    word: { id: 'w-sukima', label: '隙間', def: '物と物のあいだに残された、わずかな距離。意味を持つ手前の、構造的な余白。' },
+    ono:  { id: 'o-sutto',  label: 'すっ', def: '抵抗なく入ってくる、軽い通り抜けの音。' },
+    vis:  { id: 'v-kumo',   label: '雲の合間', def: '層雲の切れ目から差し込む、限定された光。境界がぼやけたまま現れる空。' },
+  },
+  {
+    id: 'void',
+    angle: 0,
+    nuance: '余白',
+    word: { id: 'w-yohaku',  label: '余白', def: '書の白い場所。描かれていないことで意味を生んでいる、能動的な不在。' },
+    ono:  { id: 'o-futto',   label: 'ふっ', def: '息を抜く、力を抜く、その瞬間に空く場所。' },
+    vis:  { id: 'v-yohakubo', label: '余白の書', def: '一字だけが置かれた巻物。残された白が、書かれた一字を支えている。' },
+  },
+  {
+    id: 'wait',
+    angle: 45,
+    nuance: '待機',
+    word: { id: 'w-matsu', label: '待つ', def: '答えを急がない時間。能動でも受動でもない、結果へ向かわずに過ごす持続。' },
+    ono:  { id: 'o-potsu', label: 'ぽつ', def: '点となって落ちる音。次が来るまでの間隔のなかで響く。' },
+    vis:  { id: 'v-ashiato', label: '雪原の足跡', def: '誰かが過ぎたあとに残された、止まったままの痕跡。次の歩み手を待っている。' },
+  },
+  {
+    id: 'ripple',
+    angle: 90,
+    nuance: '呼吸',
+    word: { id: 'w-kokyu', label: '呼吸', def: '内と外を行き来する、もっとも近い間。生きていることの基底にあるリズム。' },
+    ono:  { id: 'o-yura',  label: 'ゆら', def: '揺れの軌跡。戻りながら少しずつ進む、可逆的な動き。' },
+    vis:  { id: 'v-namon', label: '水面の波紋', def: '石を落とした水面が、一度膨らんでから静かに戻ってゆく形。' },
+  },
+  {
+    id: 'boundary',
+    angle: 135,
+    nuance: '境界',
+    word: { id: 'w-hiraba', label: '平場', def: '段差のない、誰もが立てる場所。役職や立場が一度降りる、対話の前提となる地面。' },
+    ono:  { id: 'o-sarari', label: 'さらり', def: '触れずに通り過ぎる、軽さを保ったままの接触。' },
+    vis:  { id: 'v-yugure', label: '夕暮れの境界', def: '昼でも夜でもない、空が色を譲り合っている時間帯。輪郭がやわらかい。' },
+  },
+  {
+    id: 'rhythm',
+    angle: 180,
+    nuance: '律動',
+    word: { id: 'w-rhythm', label: 'リズム', def: '繰り返しの中に置かれた小さな空白。音そのものではなく、音と音のあいだが律動を作る。' },
+    ono:  { id: 'o-ton',    label: 'とん', def: '一拍。次の拍までの間隔があってはじめて拍になる音。' },
+    vis:  { id: 'v-tatami', label: '朝の畳', def: '光が斜めに差し込み、目を細める前の畳目。等間隔が静かに刻まれている。' },
+  },
+  {
+    id: 'release',
+    angle: -135,
+    nuance: '手放し',
+    word: { id: 'w-shusha', label: '取捨', def: '握っているものを離す判断。間は、何かを手放した後にひらく場所である。' },
+    ono:  { id: 'o-jiwa',   label: 'じわ', def: '時間をかけて広がっていく、解放の感触。' },
+    vis:  { id: 'v-shoji',  label: '空白の障子', def: '何も貼られていない、磨かれた障子紙。光だけが通り、形が選ばれる手前。' },
+  },
+];
+
+// Cross-cluster faint relations (extra connection lines on click)
+const crossRelations = {
+  'stillness': ['void', 'release'],
+  'interval':  ['boundary', 'wait'],
+  'void':      ['release', 'stillness'],
+  'wait':      ['interval', 'rhythm'],
+  'ripple':    ['rhythm', 'boundary'],
+  'boundary':  ['interval', 'ripple'],
+  'rhythm':    ['ripple', 'wait'],
+  'release':   ['void', 'stillness'],
+};
+
+// =========================================================
+//  Geometry
+// =========================================================
+const RADIUS = { word: 175, ono: 270, vis: 380 };
+const JITTER = 18; // random offset for organic feel
+
+// Deterministic small jitter
+function jitter(seed) {
+  const x = Math.sin(seed * 9.31) * 10000;
+  return (x - Math.floor(x) - 0.5) * 2 * JITTER;
+}
+
+function polar(angle, radius, seedX, seedY) {
+  const rad = (angle * Math.PI) / 180;
+  return {
+    x: Math.cos(rad) * radius + jitter(seedX),
+    y: Math.sin(rad) * radius + jitter(seedY),
+  };
+}
+
+// =========================================================
+//  Build node list
+// =========================================================
+const nodes = [];
+clusters.forEach((c, ci) => {
+  const aw = c.angle - 6 + jitter(ci * 3) * 0.15;
+  const ao = c.angle + jitter(ci * 5) * 0.15;
+  const av = c.angle + 6 + jitter(ci * 7) * 0.15;
+
+  const pw = polar(aw, RADIUS.word, ci, ci + 100);
+  const po = polar(ao, RADIUS.ono, ci + 50, ci + 200);
+  const pv = polar(av, RADIUS.vis, ci + 80, ci + 300);
+
+  nodes.push({ ...c.word, layer: 'word', cluster: c.id, x: pw.x, y: pw.y });
+  nodes.push({ ...c.ono,  layer: 'onomatopoeia', cluster: c.id, x: po.x, y: po.y });
+  nodes.push({ ...c.vis,  layer: 'visual', cluster: c.id, x: pv.x, y: pv.y });
+});
+
+const layerJP = { word: '単語', onomatopoeia: 'オノマトペ', visual: 'ヴィジュアル' };
+
+// =========================================================
+//  Render
+// =========================================================
+const svg = document.getElementById('space');
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function el(tag, attrs = {}, parent = svg) {
+  const e = document.createElementNS(SVG_NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  parent.appendChild(e);
+  return e;
+}
+
+// Background rings
+[RADIUS.word, RADIUS.ono, RADIUS.vis].forEach(r => {
+  el('circle', { cx: 0, cy: 0, r, class: 'ring' });
+});
+
+// Connection lines group (drawn first, so it's behind)
+const linkGroup = el('g', { class: 'links' });
+
+// Pre-create lines for each cluster (word-ono, ono-vis)
+const linkMap = {};
+clusters.forEach(c => {
+  const ids = [c.word.id, c.ono.id, c.vis.id];
+  for (let i = 0; i < ids.length - 1; i++) {
+    const a = nodes.find(n => n.id === ids[i]);
+    const b = nodes.find(n => n.id === ids[i + 1]);
+    const line = el('path', {
+      d: `M ${a.x} ${a.y} Q ${a.x * 0.55 + b.x * 0.45} ${a.y * 0.55 + b.y * 0.45 - 25} ${b.x} ${b.y}`,
+      class: 'link',
+    }, linkGroup);
+    linkMap[`${ids[i]}-${ids[i + 1]}`] = line;
+  }
+});
+
+// Cross-cluster faint links: connect center words of related clusters
+const crossLinkMap = {};
+Object.entries(crossRelations).forEach(([from, tos]) => {
+  const cFrom = clusters.find(c => c.id === from);
+  tos.forEach(toId => {
+    const cTo = clusters.find(c => c.id === toId);
+    const a = nodes.find(n => n.id === cFrom.word.id);
+    const b = nodes.find(n => n.id === cTo.word.id);
+    const key = [from, toId].sort().join('-');
+    if (crossLinkMap[key]) return;
+    const line = el('path', {
+      d: `M ${a.x} ${a.y} Q 0 0 ${b.x} ${b.y}`,
+      class: 'link cross',
+      'stroke-dasharray': '2 4',
+    }, linkGroup);
+    crossLinkMap[key] = line;
+  });
+});
+
+// Center 間
+const centerG = el('g', { class: 'center' });
+const centerCircle = el('circle', { cx: 0, cy: 0, r: 52 }, centerG);
+const centerText = el('text', { x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, centerG);
+centerText.textContent = '間';
+centerG.style.cursor = 'pointer';
+centerG.addEventListener('click', resetView);
+
+// Nodes group
+const nodesGroup = el('g', { class: 'nodes' });
+
+const nodeEls = {};
+
+nodes.forEach(n => {
+  const g = el('g', { class: `node ${n.layer}`, transform: `translate(${n.x},${n.y})` }, nodesGroup);
+
+  if (n.layer === 'word') {
+    const w = n.label.length * 18 + 18;
+    el('rect', { x: -w / 2, y: -16, width: w, height: 32 }, g);
+    const t = el('text', {}, g);
+    t.textContent = n.label;
+  } else if (n.layer === 'onomatopoeia') {
+    const w = n.label.length * 10 + 22;
+    el('circle', { cx: 0, cy: 0, r: w }, g);
+    const t = el('text', {}, g);
+    t.textContent = n.label;
+  } else {
+    // Visual: organic blob via path
+    const blob = generateBlobPath(38 + jitter(n.x) * 0.4, 24 + jitter(n.y) * 0.4, 7);
+    el('path', { d: blob, class: 'blob', transform: `rotate(${jitter(n.x) * 2})` }, g);
+    const t = el('text', {}, g);
+    t.textContent = n.label;
+  }
+
+  g.addEventListener('click', (e) => {
+    e.stopPropagation();
+    selectNode(n.id);
+  });
+
+  nodeEls[n.id] = g;
+});
+
+// Generate an organic blob path
+function generateBlobPath(rx, ry, points) {
+  const pts = [];
+  for (let i = 0; i < points; i++) {
+    const a = (i / points) * Math.PI * 2;
+    const jr = 1 + (jitter(i * 11 + rx) / JITTER) * 0.25;
+    pts.push({
+      x: Math.cos(a) * rx * jr,
+      y: Math.sin(a) * ry * jr,
+    });
+  }
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 0; i < points; i++) {
+    const p1 = pts[i];
+    const p2 = pts[(i + 1) % points];
+    const cx = (p1.x + p2.x) / 2;
+    const cy = (p1.y + p2.y) / 2;
+    d += ` Q ${p1.x} ${p1.y} ${cx} ${cy}`;
+  }
+  d += ' Z';
+  return d;
+}
+
+// =========================================================
+//  Interaction
+// =========================================================
+const panel = document.getElementById('panel');
+let activeId = null;
+
+function selectNode(id) {
+  activeId = id;
+  const node = nodes.find(n => n.id === id);
+  const cluster = clusters.find(c => c.id === node.cluster);
+
+  // Visual state: dim others, highlight cluster mates
+  Object.entries(nodeEls).forEach(([nid, g]) => {
+    const ndata = nodes.find(n => n.id === nid);
+    g.classList.remove('active', 'dim');
+    if (ndata.cluster === node.cluster) {
+      if (nid === id) g.classList.add('active');
+    } else {
+      g.classList.add('dim');
+    }
+  });
+
+  // Show cluster links
+  Object.values(linkMap).forEach(l => l.classList.remove('show'));
+  const ids = [cluster.word.id, cluster.ono.id, cluster.vis.id];
+  for (let i = 0; i < ids.length - 1; i++) {
+    const line = linkMap[`${ids[i]}-${ids[i + 1]}`];
+    if (line) line.classList.add('show');
+  }
+
+  // Show cross-cluster faint links
+  Object.values(crossLinkMap).forEach(l => l.classList.remove('show'));
+  (crossRelations[node.cluster] || []).forEach(toId => {
+    const key = [node.cluster, toId].sort().join('-');
+    if (crossLinkMap[key]) crossLinkMap[key].classList.add('show');
+  });
+
+  // Update panel
+  renderPanel(node, cluster);
+}
+
+function renderPanel(node, cluster) {
+  const related = [cluster.word, cluster.ono, cluster.vis].filter(r => r.id !== node.id);
+  const layerLabels = { word: '単語', onomatopoeia: 'オノマトペ', visual: 'ヴィジュアル' };
+  const layerEng = { word: 'word', onomatopoeia: 'onomatopoeia', visual: 'visual' };
+
+  panel.innerHTML = `
+    <div class="eyebrow">${layerEng[node.layer]} · ${cluster.nuance}</div>
+    <h1>${node.label}</h1>
+    <div class="layer-tag">${layerLabels[node.layer]}</div>
+    <p class="def">${node.def}</p>
+    <div class="section-label">同じクラスタ ── ${cluster.nuance}</div>
+    <div class="related">
+      ${related.map(r => `
+        <div class="related-item" data-id="${r.id}">
+          <span class="label">${layerLabels[nodes.find(n => n.id === r.id).layer]}</span>
+          <span class="name">${r.label}</span>
+        </div>
+      `).join('')}
+    </div>
+    <div class="section-label">関連クラスタ</div>
+    <div class="related">
+      ${(crossRelations[cluster.id] || []).map(toId => {
+        const c = clusters.find(cc => cc.id === toId);
+        return `<div class="related-item" data-id="${c.word.id}">
+          <span class="label">${c.nuance}</span>
+          <span class="name">${c.word.label} / ${c.ono.label} / ${c.vis.label}</span>
+        </div>`;
+      }).join('')}
+    </div>
+    <a class="ref-link" href="../reference-room/?keyword=${encodeURIComponent(node.label)}">
+      資料室でこの言葉を引く
+    </a>
+  `;
+
+  panel.querySelectorAll('.related-item').forEach(item => {
+    item.addEventListener('click', () => selectNode(item.dataset.id));
+  });
+}
+
+function resetView() {
+  activeId = null;
+  Object.values(nodeEls).forEach(g => g.classList.remove('active', 'dim'));
+  Object.values(linkMap).forEach(l => l.classList.remove('show'));
+  Object.values(crossLinkMap).forEach(l => l.classList.remove('show'));
+
+  panel.innerHTML = document.querySelector('.panel-default-template').innerHTML;
+}
+
+// Cache default panel content
+const defaultTemplate = document.createElement('template');
+defaultTemplate.className = 'panel-default-template';
+defaultTemplate.innerHTML = panel.innerHTML;
+document.body.appendChild(defaultTemplate);
+
+// Click outside to reset
+svg.addEventListener('click', (e) => {
+  if (e.target === svg) resetView();
+});
+
+// =========================================================
+//  Spectrum slider — bias layer emphasis
+// =========================================================
+const spectrum = document.getElementById('spectrum');
+spectrum.addEventListener('input', (e) => {
+  const v = parseInt(e.target.value, 10) / 100;
+  // 0 = 感覚 (visual emphasized), 1 = 論理 (word emphasized)
+  const visualOp = 0.4 + (1 - v) * 0.6;
+  const wordOp = 0.4 + v * 0.6;
+  const onoOp = 0.6 + Math.abs(v - 0.5) * -0.3 + 0.3;
+
+  document.querySelectorAll('.node.visual').forEach(n => {
+    if (!n.classList.contains('dim') && !n.classList.contains('active'))
+      n.style.opacity = visualOp;
+  });
+  document.querySelectorAll('.node.word').forEach(n => {
+    if (!n.classList.contains('dim') && !n.classList.contains('active'))
+      n.style.opacity = wordOp;
+  });
+  document.querySelectorAll('.node.onomatopoeia').forEach(n => {
+    if (!n.classList.contains('dim') && !n.classList.contains('active'))
+      n.style.opacity = onoOp;
+  });
+});
+
+// =========================================================
+//  Pan and zoom
+// =========================================================
+let viewBox = { x: -500, y: -500, w: 1000, h: 1000 };
+let isPanning = false;
+let panStart = null;
+
+function updateViewBox() {
+  svg.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`);
+}
+
+svg.addEventListener('mousedown', (e) => {
+  if (e.target !== svg) return;
+  isPanning = true;
+  svg.classList.add('dragging');
+  panStart = { x: e.clientX, y: e.clientY, vbX: viewBox.x, vbY: viewBox.y };
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (!isPanning) return;
+  const rect = svg.getBoundingClientRect();
+  const scale = viewBox.w / rect.width;
+  viewBox.x = panStart.vbX - (e.clientX - panStart.x) * scale;
+  viewBox.y = panStart.vbY - (e.clientY - panStart.y) * scale;
+  updateViewBox();
+});
+
+window.addEventListener('mouseup', () => {
+  isPanning = false;
+  svg.classList.remove('dragging');
+});
+
+svg.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const factor = e.deltaY > 0 ? 1.08 : 1 / 1.08;
+  const rect = svg.getBoundingClientRect();
+  const mx = ((e.clientX - rect.left) / rect.width) * viewBox.w + viewBox.x;
+  const my = ((e.clientY - rect.top) / rect.height) * viewBox.h + viewBox.y;
+  viewBox.w *= factor;
+  viewBox.h *= factor;
+  viewBox.x = mx - (mx - viewBox.x) * factor;
+  viewBox.y = my - (my - viewBox.y) * factor;
+  // Clamp
+  viewBox.w = Math.max(400, Math.min(2400, viewBox.w));
+  viewBox.h = Math.max(400, Math.min(2400, viewBox.h));
+  updateViewBox();
+}, { passive: false });
+
+// =========================================================
+//  Gentle ambient drift animation
+// =========================================================
+function drift() {
+  const t = Date.now() / 4000;
+  nodes.forEach((n, i) => {
+    const g = nodeEls[n.id];
+    if (g.classList.contains('active')) return;
+    const dx = Math.sin(t + i * 0.7) * 2.5;
+    const dy = Math.cos(t * 0.8 + i * 0.5) * 2.5;
+    g.setAttribute('transform', `translate(${n.x + dx},${n.y + dy})`);
+  });
+  requestAnimationFrame(drift);
+}
+drift();
+
+// =========================================================
+//  Deep-link: if URL has ?node=id, open it
+// =========================================================
+const params = new URLSearchParams(window.location.search);
+if (params.has('node')) {
+  setTimeout(() => selectNode(params.get('node')), 100);
+}
+</script>
+
+</body>
+</html>
